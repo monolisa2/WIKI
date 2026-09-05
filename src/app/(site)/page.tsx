@@ -49,7 +49,7 @@ export default async function HomePage() {
           <p className="mx-auto mt-4 max-w-xl text-[17px] text-ink-2 sm:text-[19px]">
             흩어진 규정과 안내 문서가 어디에 있고, 최신인지 한 곳에서 확인합니다.
           </p>
-          <div className="mt-8">
+          <div id="hero-search" className="mt-8">
             <SearchTrigger variant="hero" />
           </div>
           <div className="mt-6 flex flex-wrap justify-center gap-2">

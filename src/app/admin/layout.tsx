@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
           <div className="flex items-center gap-6">
             <BrandMark href="/admin" />
-            <span className="badge bg-black/[0.06] text-ink-2">관리자</span>
+            <span className="badge bg-accent-soft text-accent">관리자</span>
             <nav className="flex items-center gap-1">
               {NAV.map((item) => (
                 <Link key={item.href} href={item.href} className="btn-ghost">

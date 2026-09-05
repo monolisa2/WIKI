@@ -122,9 +122,9 @@ export function SearchTrigger({ variant = "compact", className = "" }: { variant
         type="button"
         onClick={() => open()}
         aria-label="검색 열기"
-        className={`group glass-strong mx-auto flex w-full max-w-2xl items-center gap-4 rounded-[22px] border border-white/70 px-6 text-left shadow-lift outline-none transition-[box-shadow,transform] duration-300 hover:shadow-float hover:-translate-y-px focus-visible:ring-4 focus-visible:ring-accent-strong/20 h-[60px] sm:h-16 ${className}`}
+        className={`group glass-strong mx-auto flex w-full max-w-2xl items-center gap-4 rounded-[22px] border border-white/70 px-6 text-left shadow-lift outline-none transition-[box-shadow,transform,border-color] duration-300 hover:border-accent-line hover:shadow-float hover:-translate-y-px focus-visible:ring-4 focus-visible:ring-accent-strong/20 h-[60px] sm:h-16 ${className}`}
       >
-        <SearchIcon className="h-6 w-6 shrink-0 text-ink-3 transition-colors group-hover:text-ink-2" />
+        <SearchIcon className="h-6 w-6 shrink-0 text-ink-3 transition-colors group-hover:text-accent" />
         <span className="flex-1 truncate text-[17px] sm:text-[18px] text-ink-3">규정, 안내, 양식… 무엇이든 검색</span>
         <kbd className="kbd hidden sm:inline-flex">{shortcut}</kbd>
       </button>
@@ -384,11 +384,11 @@ function ResultRow({
         e.preventDefault();
         onSelect(item.href);
       }}
-      className={`mx-2 flex items-start gap-3 rounded-[14px] px-3 py-2.5 transition-colors ${active ? "bg-ink text-white" : "text-ink hover:bg-black/5"}`}
+      className={`mx-2 flex items-start gap-3 rounded-[14px] px-3 py-2.5 transition-colors ${active ? "bg-accent-strong text-white" : "text-ink hover:bg-accent-soft"}`}
     >
       <span
         className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] text-[12px] font-semibold ${
-          active ? "bg-white/15 text-white" : "bg-black/5 text-ink-2"
+          active ? "bg-white/20 text-white" : "bg-accent-soft text-accent"
         }`}
       >
         {glyph}

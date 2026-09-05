@@ -17,9 +17,15 @@
   --hairline: rgba(0, 0, 0, 0.08);
   --hairline-strong: rgba(0, 0, 0, 0.16);
 
-  --accent: #3f7f21;        /* 브랜드 그린 (본문 링크용, 대비 4.5:1 이상) */
-  --accent-strong: #5fa32e; /* 브랜드 그린 (마크·포커스링) */
-  --accent-soft: #eef7e6;
+  /* 인라이플 브랜드 그린 */
+  --brand: #7ac143;         /* 로고·마크·글로우 */
+  --brand-deep: #5fa32e;    /* 버튼·선택 강조 (채움) */
+  --brand-text: #3f7f21;    /* 링크·텍스트 (흰 배경 대비 4.5:1 이상) */
+  --brand-soft: #eef7e6;    /* 연한 배경 */
+  --brand-line: #cfe6b8;    /* 연한 테두리 */
+  --accent: var(--brand-text);
+  --accent-strong: var(--brand-deep);
+  --accent-soft: var(--brand-soft);
   --danger: #d70015;
   --warn: #9a5b00;
   --warn-soft: #fff4e0;
@@ -40,6 +46,8 @@
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-bright: var(--brand);
+  --color-accent-line: var(--brand-line);
   --color-danger: var(--danger);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
@@ -53,8 +61,8 @@
   --shadow-float: 0 24px 80px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.08);
 
   --font-sans:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui,
-    "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+    var(--font-suit, "SUIT Variable"), "SUIT", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
 
   --ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -75,7 +83,7 @@ body {
 }
 
 ::selection {
-  background: rgba(95, 163, 46, 0.22);
+  background: rgba(122, 193, 67, 0.28);
 }
 
 /* ── 공용 유틸리티 (Tailwind v4: @apply 에서 재사용하려면 @utility) ── */
@@ -116,13 +124,13 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply btn bg-ink text-white hover:bg-black;
+    @apply btn bg-accent-strong text-white hover:bg-accent;
   }
   .btn-secondary {
-    @apply btn bg-surface text-ink border border-hairline-strong hover:bg-surface-2;
+    @apply btn bg-surface text-ink border border-hairline-strong hover:border-accent-line hover:bg-accent-soft/60 hover:text-accent;
   }
   .btn-ghost {
-    @apply btn text-ink-2 hover:bg-black/5 hover:text-ink;
+    @apply btn text-ink-2 hover:bg-accent-soft hover:text-accent;
   }
   .btn-danger {
     @apply btn text-danger hover:bg-danger/8;
@@ -195,7 +203,7 @@ body {
   color: var(--text);
 }
 .prose-wiki h1 { font-size: 1.7rem; }
-.prose-wiki h2 { font-size: 1.3rem; padding-bottom: 0.4em; border-bottom: 1px solid var(--hairline); }
+.prose-wiki h2 { font-size: 1.3rem; padding-bottom: 0.4em; border-bottom: 1px solid var(--brand-line); }
 .prose-wiki h3 { font-size: 1.08rem; }
 .prose-wiki h4 { font-size: 0.95rem; color: var(--text-2); }
 .prose-wiki p { margin: 0.75em 0; }
@@ -211,8 +219,8 @@ body {
 .prose-wiki blockquote {
   margin: 1.2em 0;
   padding: 0.8em 1.1em;
-  border-left: 3px solid var(--accent-strong);
-  background: var(--surface-2);
+  border-left: 3px solid var(--brand);
+  background: var(--brand-soft);
   border-radius: 0 12px 12px 0;
   color: var(--text-2);
 }
@@ -240,7 +248,7 @@ body {
 .prose-wiki hr { border: 0; border-top: 1px solid var(--hairline); margin: 2em 0; }
 .prose-wiki img { max-width: 100%; border-radius: 14px; }
 .prose-wiki mark, .hl mark {
-  background: rgba(95, 163, 46, 0.2);
+  background: rgba(122, 193, 67, 0.28);
   color: inherit;
   border-radius: 3px;
   padding: 0 0.1em;

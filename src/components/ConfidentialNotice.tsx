@@ -7,7 +7,7 @@ export function ConfidentialNotice() {
   ];
   return (
     <aside className="card flex gap-4 px-5 py-4 sm:px-6" aria-label="사내 문서 취급 안내">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/[0.06] text-ink-2" aria-hidden>
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent" aria-hidden>
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="4" y="10" width="16" height="11" rx="2.5" />
           <path d="M8 10V7a4 4 0 0 1 8 0v3" />

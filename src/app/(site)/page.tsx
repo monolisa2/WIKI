@@ -42,7 +42,7 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(60%_70%_at_50%_0%,rgba(95,163,46,0.12),transparent_70%)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(60%_70%_at_50%_0%,rgba(122,193,67,0.22),transparent_70%)]"
         />
         <div className="relative mx-auto max-w-6xl px-5 pb-12 pt-16 text-center sm:px-8 sm:pb-16 sm:pt-24">
           <h1 className="text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">무엇을 찾으세요?</h1>
@@ -75,7 +75,10 @@ export default async function HomePage() {
               <section key={c.id} id={`cat-${c.slug}`} className="scroll-mt-24">
                 <header className="mb-3 flex items-end justify-between gap-4 px-1">
                   <div>
-                    <h2 className="text-[22px] font-semibold tracking-tight">{c.name}</h2>
+                    <h2 className="flex items-center gap-2.5 text-[22px] font-semibold tracking-tight">
+                      <span aria-hidden className="inline-block h-2.5 w-2.5 rotate-45 rounded-[2px] bg-accent-bright" />
+                      {c.name}
+                    </h2>
                     {c.hint ? <p className="mt-0.5 text-[13px] text-ink-2">{c.hint}</p> : null}
                   </div>
                   <span className="text-[13px] tabular-nums text-ink-3">{list.length}건</span>

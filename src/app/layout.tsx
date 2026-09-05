@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+// Pretendard Variable 을 npm 패키지에서 직접 번들 (외부 CDN 의존 없음, 동적 서브셋으로 필요한 글리프만 로드)
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,14 +11,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <head>
-        {/* Pretendard Variable · jsdelivr CDN (명세 2번) */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-          crossOrigin="anonymous"
-        />
-      </head>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

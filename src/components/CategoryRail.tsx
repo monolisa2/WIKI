@@ -39,11 +39,11 @@ export function CategoryRail({ categories }: { categories: RailCategory[] }) {
                 href={`#cat-${c.slug}`}
                 aria-current={isActive ? "true" : undefined}
                 className={`flex items-center justify-between gap-2 rounded-[10px] px-3 py-1.5 text-[14px] transition-colors ${
-                  isActive ? "bg-black/[0.06] font-medium text-ink" : "text-ink-2 hover:bg-black/[0.04] hover:text-ink"
+                  isActive ? "bg-accent-soft font-medium text-accent" : "text-ink-2 hover:bg-black/[0.04] hover:text-ink"
                 }`}
               >
                 <span className="truncate">{c.name}</span>
-                <span className="text-[12px] tabular-nums text-ink-3">{c.count}</span>
+                <span className={`text-[12px] tabular-nums ${isActive ? "text-accent/80" : "text-ink-3"}`}>{c.count}</span>
               </a>
             </li>
           );

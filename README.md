@@ -16,8 +16,8 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 | 3 | `/admin` — 문서 CRUD, 마크다운 미리보기, publish 시 revision 스냅샷 | ✅ (+ 분류 관리, 개정 이력 보기·복원) |
 | 4 | `/` 임직원 화면 — 통합 검색, 분류 목록, 문서 상세 | ✅ |
 | 5 | 대시보드 카운트, 피드백 폼 | ✅ |
-| 6 | 온보딩 가이드 HTML → 마크다운 | 1/15 (`supabase/seed/onboarding_todo.sql`) |
-| 7 | Vercel 배포 → 본부장 리뷰 → 사내 도메인 | ⏳ |
+| 6 | 온보딩 가이드 HTML → 마크다운 | ✅ 확보된 1건 변환 (`seed/onboarding_todo.sql`) + 인덱스 44건 (`seed/index_stubs.sql`) |
+| 7 | Vercel 배포 → 본부장 리뷰 → 사내 도메인 | ⏳ 절차: [docs/DEPLOY.md](docs/DEPLOY.md) |
 
 ## 로컬 실행
 
@@ -31,7 +31,10 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
    supabase/migrations/20260905000005_search.sql     -- search_documents() 통합 검색
    supabase/seed.sql                                 -- 분류 9개 + 허용 도메인(enliple.com)
    supabase/seed/onboarding_todo.sql                 -- 온보딩 가이드 문서 13건 (draft)
+   supabase/seed/index_stubs.sql                     -- 인덱스 문서 44건 (published · 내용 수집 필요)
    ```
+
+   콘솔에서 하나씩 진행하는 상세 절차는 **[docs/DEPLOY.md](docs/DEPLOY.md)** 참고.
 
    Supabase CLI 를 쓴다면 `supabase init` 후 `supabase db push` 로 migrations 를, `supabase db seed` 또는 psql 로 seed 를 적용한다.
 
@@ -108,5 +111,5 @@ src/components/            search/SearchCommand(Spotlight), SiteHeader, Category
 src/lib/supabase/          server / client / middleware 클라이언트
 supabase/migrations/       스키마 · 인증 · RLS · 함수
 supabase/seed*.sql         분류 · 문서 seed
-docs/                      개발 명세
+docs/                      개발 명세 · 배포 절차(DEPLOY.md)
 ```

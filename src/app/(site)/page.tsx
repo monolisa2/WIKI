@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SearchTrigger } from "@/components/search/SearchCommand";
 import { CategoryRail } from "@/components/CategoryRail";
 import { DocRow, type DocRowData } from "@/components/DocRow";
+import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import type { Category } from "@/lib/types";
 
 type Row = DocRowData & { category_id: number };
@@ -66,6 +67,8 @@ export default async function HomePage() {
         <CategoryRail categories={rail} />
 
         <div className="space-y-12">
+          <ConfidentialNotice />
+
           {categories.map((c) => {
             const list = byCategory.get(c.id) ?? [];
             return (

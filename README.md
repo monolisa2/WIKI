@@ -16,7 +16,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 | 3 | `/admin` — 문서 CRUD, 마크다운 미리보기, publish 시 revision 스냅샷 | ✅ (+ 분류 관리, 개정 이력 보기·복원) |
 | 4 | `/` 임직원 화면 — 통합 검색, 분류 목록, 문서 상세 | ✅ |
 | 5 | 대시보드 카운트, 피드백 폼 | ✅ |
-| 6 | 문서 입력 | ✅ 온보딩 가이드 13건 · 인덱스 44건 · 규정 원문 10건 + 규정 기반 주제 안내 35건 (`seed/`) |
+| 6 | 문서 입력 | ✅ 온보딩 가이드 13건 · 인덱스 44건 · 규정 원문 12건(계열사 취업규칙 포함) + 규정 기반 주제 안내 35건 (`seed/`) |
 | 7 | Vercel 배포 → 본부장 리뷰 → 사내 도메인 | ⏳ 절차: [docs/DEPLOY.md](docs/DEPLOY.md) |
 
 ## 로컬 실행
@@ -32,7 +32,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
    supabase/seed.sql                                 -- 분류 9개 + 허용 도메인(enliple.com)
    supabase/seed/onboarding_todo.sql                 -- 온보딩 가이드 문서 13건 (draft)
    supabase/seed/index_stubs.sql                     -- 인덱스 문서 44건 (published · 내용 수집 필요)
-   supabase/seed/regulations.sql                     -- 규정 원문 10건 + 주제별 안내 35건 (대외비 · gitignore, 비공개 전환 후 add -f)
+   supabase/seed/regulations.sql                     -- 규정 원문 12건 + 주제별 안내 35건 (대외비 · gitignore, 비공개 전환 후 add -f)
    ```
 
    콘솔에서 하나씩 진행하는 상세 절차는 **[docs/DEPLOY.md](docs/DEPLOY.md)** 참고.

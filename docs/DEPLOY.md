@@ -38,13 +38,13 @@ supabase/migrations/20260905000005_search.sql     통합 검색 함수
 supabase/seed.sql                                 분류 9개 · 허용 도메인 enliple.com
 supabase/seed/onboarding_todo.sql                 온보딩 가이드 문서 13건 (작성 중)
 supabase/seed/index_stubs.sql                     인덱스 문서 44건 (공개 · 내용 수집 필요)
-supabase/seed/regulations.sql                     규정 원문 10건 + 주제별 안내 35건 (대외비 · 저장소 비공개 후에만 커밋)
+supabase/seed/regulations.sql                     규정 원문 12건(인라이플 10 + 모비소프트·모비위드 취업규칙) + 주제별 안내 35건 (대외비 · 저장소 비공개 후에만 커밋)
 ```
 
 `regulations.sql` 은 취업규칙 등 규정 전문이 들어 있어 저장소가 **Private** 일 때만 git 에 추가합니다 (`git add -f supabase/seed/regulations.sql`).
 그 전에는 파일을 직접 전달받아 SQL Editor 에 붙여 넣습니다. 이미 앞의 파일들을 적용한 프로젝트에도 그대로 실행하면 됩니다 (재실행 안전).
 
-확인: **Table Editor** 에서 `categories` 9행, `documents` 57행(규정 seed 까지 적용하면 75행)이 보이면 정상입니다.
+확인: **Table Editor** 에서 `categories` 9행, `documents` 57행(규정 seed 까지 적용하면 77행)이 보이면 정상입니다.
 
 > Supabase CLI 를 쓸 줄 안다면 `supabase link` 후 `supabase db push` 로 migrations 를 올리고
 > seed 는 `psql "$DB_URL" -f supabase/seed.sql` 식으로 적용해도 됩니다.

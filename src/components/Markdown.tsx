@@ -3,12 +3,13 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import remarkCallouts from "@/lib/remark-callouts";
 
 export function Markdown({ children, className = "" }: { children: string; className?: string }) {
   return (
     <div className={`prose-wiki ${className}`}>
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkCallouts]}
         rehypePlugins={[rehypeSlug]}
         components={{
           a: ({ href, children: c }) => (

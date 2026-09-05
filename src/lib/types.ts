@@ -14,6 +14,7 @@ export type Category = {
   slug: string;
   name: string;
   hint: string | null;
+  icon: string | null;
   sort_order: number;
 };
 
@@ -25,6 +26,7 @@ export type Document = {
   summary: string | null;
   body_md: string | null;
   doc_type: DocType;
+  icon: string | null;
   scope: Scope[];
   source_system: SourceSystem | null;
   source_url: string | null;
@@ -60,6 +62,7 @@ export type DocumentInput = {
   summary: string;
   body_md: string;
   doc_type: DocType;
+  icon: string;
   scope: Scope[];
   source_system: SourceSystem | "";
   source_url: string;

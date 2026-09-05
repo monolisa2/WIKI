@@ -21,6 +21,7 @@ function toInput(d: Document): DocumentInput {
     summary: d.summary ?? "",
     body_md: d.body_md ?? "",
     doc_type: d.doc_type,
+    icon: d.icon ?? "",
     scope: d.scope,
     source_system: d.source_system ?? "",
     source_url: d.source_url ?? "",

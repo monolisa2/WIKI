@@ -8,6 +8,7 @@ type SuggestionRow = {
   title: string;
   summary: string | null;
   doc_type: DocType;
+  icon: string | null;
   categories: { name: string } | null;
 };
 
@@ -22,7 +23,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     user ? supabase.from("profiles").select("role, name").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),
     supabase
       .from("documents")
-      .select("slug, title, summary, doc_type, categories(name)")
+      .select("slug, title, summary, doc_type, icon, categories(name)")
       .eq("status", "published")
       .order("is_pinned", { ascending: false })
       .order("updated_at", { ascending: false })
@@ -34,6 +35,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     title: r.title,
     summary: r.summary,
     doc_type: r.doc_type,
+    icon: r.icon,
     category_name: r.categories?.name ?? null,
   }));
 

@@ -5,7 +5,7 @@
 
 ## 스택
 
-Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · Markdown 본문 · Pretendard Variable · Vercel
+Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · Markdown 본문 · Noto Sans KR Variable · Vercel
 
 ## 진행 상태 (명세 7번 개발 순서)
 
@@ -92,6 +92,24 @@ macOS / Apple 스타일을 기준으로 잡았다. 시안 HTML 은 참고용.
 - 검색은 DB 함수 `search_documents()` 가 담당한다. security invoker 라 RLS 가 그대로 적용되어 임직원은 공개 문서만 검색된다.
 - 결과의 하이라이트는 `ts_headline` 의 `⟦ ⟧` 마커를 클라이언트에서 `<mark>` 로 바꿔 그린다 (HTML 은 주입하지 않음).
 
+### 노션형 화면과 본문 작성 규칙
+
+- 홈은 분류별 "이모지 + 제목" 링크 그리드(포털형). 문서·분류 아이콘은 `documents.icon` / `categories.icon` 에 이모지 한 글자로 저장하고, 비어 있으면 유형별 기본 아이콘(규정 📘 · 안내 📄 · 양식 📝 · 링크 🔗)을 쓴다.
+- 문서 화면은 흰 시트 위에 아이콘 · 제목 · 인용형 요약 · 속성 줄 · 본문, 큰 화면에서는 우측에 스크롤을 따라오는 목차(제목 3개 이상일 때).
+- 본문 마크다운에서 `## 제목` 은 연초록 띠 소제목으로, 인용문은 아래 규칙으로 콜아웃이 된다 (`src/lib/remark-callouts.ts`).
+
+  | 문법 | 표시 |
+  |---|---|
+  | `> [!NOTE] …` | 💡 안내 (파란 배경) |
+  | `> [!TIP] …` | ✅ 확인 (초록 배경) |
+  | `> [!IMPORTANT] …` | ❗ 중요 (보라 배경) |
+  | `> [!WARNING] …` | ⚠️ 주의 (노란 배경) |
+  | `> [!CAUTION] …` | 🚫 금지 (빨간 배경) |
+  | `> 🎂 …` (이모지로 시작) | 그 이모지를 아이콘으로 쓰는 기본 콜아웃 |
+  | `> …` (마커 없음) | 일반 인용문 |
+
+- 관리자 편집기는 문법을 몰라도 쓸 수 있게 툴바로 제목·목록·표·콜아웃·링크를 넣는다. "문서 링크"는 위키 문서 목록에서, "조문 링크"는 규정 → 조문 순서로 골라 넣는다. 미리보기는 우측에 실시간으로 뜬다.
+
 ## 디렉터리
 
 ```
@@ -107,7 +125,8 @@ src/app/
     page.tsx               대시보드 카운트
     docs/                  문서 목록(필터·정렬·검색) · 새 문서 · 편집 · 개정 이력
     categories/            분류 관리
-src/components/            search/SearchCommand(Spotlight), SiteHeader, CategoryRail, DocRow, DocumentForm, Markdown, 배지류
+src/components/            home/PortalHome(포털 홈), doc/DocView(문서 화면)+DocToc(목차), editor/MarkdownEditor(툴바 편집기)+IconField,
+                           search/SearchCommand(Spotlight), SiteHeader, DocumentForm, Markdown(+remark-callouts), 배지류
 src/lib/supabase/          server / client / middleware 클라이언트
 supabase/migrations/       스키마 · 인증 · RLS · 함수
 supabase/seed*.sql         분류 · 문서 seed

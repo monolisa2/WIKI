@@ -2,23 +2,27 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { Markdown } from "@/components/Markdown";
+import { MarkdownEditor } from "@/components/editor/MarkdownEditor";
+import { IconField } from "@/components/editor/IconField";
 import { saveDocument, type DocFormState } from "@/app/admin/docs/actions";
 import { DOC_TYPES, SCOPES, SOURCE_SYSTEMS, type DocType, type Scope, type SourceSystem } from "@/lib/constants";
 import type { Category, DocumentInput } from "@/lib/types";
 
 /** 문서 템플릿 (개발 명세 6번) */
-export const BODY_TEMPLATE = `## 적용 범위
-(전 계열사 / 특정 법인)
+export const BODY_TEMPLATE = `## 한눈에 보기
+- 핵심 내용을 2~4줄로 적어주세요.
 
-## 내용
-...
+> [!TIP] 꼭 알아야 할 점은 이런 강조 상자에 넣으면 눈에 잘 띕니다.
 
 ## 신청 · 처리 방법
-(경로: 그룹웨어 전자결재 > ... )
+1. (경로: 전자결재 > … )
+2. …
 
 ## 관련 문서
-- ...
+- 툴바의 "문서 링크" 버튼으로 다른 문서를 골라 넣으세요.
+
+## 근거 규정
+- 툴바의 "조문 링크" 버튼으로 규정의 조문을 골라 넣으세요.
 
 > 이 안내는 취업규칙 및 관련 규정에 따릅니다. 내용이 다를 경우 원문 규정이 우선합니다.
 `;
@@ -30,6 +34,7 @@ export const EMPTY_INPUT: DocumentInput = {
   summary: "",
   body_md: BODY_TEMPLATE,
   doc_type: "guide",
+  icon: "",
   scope: ["all"],
   source_system: "wiki",
   source_url: "",
@@ -60,7 +65,6 @@ export function DocumentForm({
 }) {
   const [state, action, pending] = useActionState<DocFormState, FormData>(saveDocument, {});
   const [v, setV] = useState<DocumentInput>(initial ?? EMPTY_INPUT);
-  const [preview, setPreview] = useState(false);
 
   const set = <K extends keyof DocumentInput>(key: K, value: DocumentInput[K]) => setV((prev) => ({ ...prev, [key]: value }));
 
@@ -97,6 +101,7 @@ export function DocumentForm({
               required
             />
           </div>
+          <IconField value={v.icon} onChange={(icon) => set("icon", icon)} />
           <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
             <div>
               <label className="label" htmlFor="slug">
@@ -111,7 +116,7 @@ export function DocumentForm({
                 placeholder="예: annual-leave"
                 required
               />
-              <p className="mt-1 text-[11px] text-ink-2">/docs/{v.slug || "…"}</p>
+              <p className="mt-1 text-[11px] text-ink-2">문서 주소가 됩니다: /docs/{v.slug || "…"} (제목을 적으면 자동으로 채워집니다)</p>
             </div>
             <div>
               <label className="label" htmlFor="owner_team">
@@ -129,40 +134,16 @@ export function DocumentForm({
         </div>
 
         <div className="card p-5">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <label className="label mb-0" htmlFor="body_md">
-              본문 (Markdown)
-            </label>
-            <div className="flex items-center gap-1 text-xs">
-              <button type="button" className={preview ? "btn-ghost" : "btn-secondary"} onClick={() => setPreview(false)}>
-                편집
-              </button>
-              <button type="button" className={preview ? "btn-secondary" : "btn-ghost"} onClick={() => setPreview(true)}>
-                미리보기
-              </button>
-            </div>
-          </div>
-
+          <label className="label" htmlFor="body_md">
+            본문
+          </label>
           {isLink ? (
             <p className="text-sm text-ink-2 bg-accent-soft rounded-lg p-4">
               링크 문서는 본문 없이 <strong>원문 URL</strong> 만 저장합니다. 우측 패널에서 URL 을 입력해주세요.
             </p>
-          ) : preview ? (
-            <div className="min-h-[420px] rounded-lg border border-hairline p-5">
-              {v.body_md.trim() ? <Markdown>{v.body_md}</Markdown> : <p className="text-sm text-ink-2">본문이 비어 있습니다.</p>}
-            </div>
           ) : (
-            <textarea
-              id="body_md"
-              name="body_md"
-              className="input font-mono text-[13px] leading-relaxed min-h-[420px] resize-y"
-              value={v.body_md}
-              onChange={(e) => set("body_md", e.target.value)}
-              spellCheck={false}
-            />
+            <MarkdownEditor id="body_md" name="body_md" value={v.body_md} onChange={(body) => set("body_md", body)} />
           )}
-          {/* 미리보기 중에도 값이 전송되도록 */}
-          {preview && !isLink ? <input type="hidden" name="body_md" value={v.body_md} /> : null}
         </div>
       </div>
 

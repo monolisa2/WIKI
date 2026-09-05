@@ -29,6 +29,12 @@
   --danger: #d70015;
   --warn: #9a5b00;
   --warn-soft: #fff4e0;
+  --callout-plain: #fbf6e3;
+  --callout-note: #eef4ff;
+  --callout-tip: #eef7e6;
+  --callout-important: #f3efff;
+  --callout-warning: #fff6dd;
+  --callout-caution: #fdeeee;
 
   --glass: rgba(255, 255, 255, 0.72);
   --glass-strong: rgba(255, 255, 255, 0.86);
@@ -217,10 +223,11 @@ body {
   color: var(--text);
 }
 .prose-wiki h1 { font-size: 1.75rem; }
-.prose-wiki h2 { font-size: 1.35rem; padding-bottom: 0.45em; border-bottom: 2px solid var(--brand-line); margin-top: 2.2em; }
+.prose-wiki h2 { font-size: 1.3rem; padding: 0.38em 0.75em; border-radius: 10px; background: var(--brand-soft); margin-top: 2.2em; }
 .prose-wiki h3 { font-size: 1.1rem; padding-left: 0.65em; border-left: 3px solid var(--brand); margin-top: 1.9em; }
 .prose-wiki h4 { font-size: 1rem; color: var(--text-2); }
-.prose-wiki h2 + h3 { margin-top: 1.1em; }
+.prose-wiki h2 + h3 { margin-top: 1.2em; }
+.prose-wiki h2 + p, .prose-wiki h2 + ul, .prose-wiki h2 + ol, .prose-wiki h2 + table { margin-top: 0.9em; }
 .prose-wiki p { margin: 0.75em 0; }
 .prose-wiki ul, .prose-wiki ol { margin: 0.6em 0 0.6em 1.5em; }
 .prose-wiki ul { list-style: disc; }
@@ -233,14 +240,47 @@ body {
 .prose-wiki strong { font-weight: 600; }
 .prose-wiki blockquote {
   margin: 1.2em 0;
-  padding: 0.8em 1.1em;
-  border-left: 3px solid var(--brand);
-  background: var(--brand-soft);
-  border-radius: 0 12px 12px 0;
+  padding: 0.1em 0 0.1em 1.1em;
+  border-left: 3px solid var(--text);
   color: var(--text-2);
+  font-size: 0.96em;
 }
 .prose-wiki blockquote p { margin: 0.2em 0; }
 .prose-wiki blockquote strong { color: var(--text); }
+/* ── 콜아웃: > [!NOTE] … / > 🎂 … (remark-callouts) ── */
+.callout {
+  display: grid;
+  grid-template-columns: 1.6em minmax(0, 1fr);
+  column-gap: 0.7em;
+  align-items: start;
+  margin: 1.1em 0;
+  padding: 0.85em 1.1em;
+  border-radius: 12px;
+  background: var(--callout-plain);
+  color: var(--text);
+  font-size: 0.97em;
+  line-height: 1.75;
+}
+.callout::before {
+  content: attr(data-emoji);
+  grid-column: 1;
+  grid-row: 1 / span 99;
+  font-size: 1.15em;
+  line-height: 1.55;
+}
+.callout > * { grid-column: 2; }
+.callout > p { margin: 0.15em 0; }
+.callout > ul, .callout > ol { margin: 0.3em 0 0.3em 1.3em; }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+.callout strong { color: var(--text); }
+.callout-plain { background: var(--callout-plain); }
+.callout-note { background: var(--callout-note); }
+.callout-tip { background: var(--callout-tip); }
+.callout-important { background: var(--callout-important); }
+.callout-warning { background: var(--callout-warning); }
+.callout-caution { background: var(--callout-caution); }
+
 .prose-wiki code {
   font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.86em;

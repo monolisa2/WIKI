@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { DOC_TYPES, type DocType } from "@/lib/constants";
+import { docIcon, type DocType } from "@/lib/constants";
 
 /* ────────────────────────────────────────────────────────────────
    통합 검색 (Spotlight 방식)
@@ -17,6 +17,7 @@ export type SearchSuggestion = {
   title: string;
   summary: string | null;
   doc_type: DocType;
+  icon: string | null;
   category_name: string | null;
 };
 
@@ -26,6 +27,7 @@ export type SearchHit = {
   title: string;
   summary: string | null;
   doc_type: DocType;
+  icon: string | null;
   scope: string[];
   revised_date: string | null;
   source_system: string | null;
@@ -52,6 +54,7 @@ type Item = {
   subtitle: string | null;
   meta: string | null;
   docType?: DocType;
+  icon?: string | null;
 };
 
 type SearchContextValue = { open: (initialQuery?: string) => void; isMac: boolean };
@@ -219,6 +222,7 @@ function SearchDialog({
           subtitle: s.summary,
           meta: s.category_name,
           docType: s.doc_type,
+          icon: s.icon,
         })),
       };
     }
@@ -240,6 +244,7 @@ function SearchDialog({
         subtitle: d.headline || d.summary,
         meta: d.category_name,
         docType: d.doc_type,
+        icon: d.icon,
       })),
     };
   }, [term, result, suggestions]);
@@ -369,7 +374,7 @@ function ResultRow({
   onActivate: (i: number) => void;
   onSelect: (href: string) => void;
 }) {
-  const glyph = item.kind === "category" ? "#" : (item.docType && DOC_TYPES[item.docType]?.[0]) || "문";
+  const glyph = item.kind === "category" ? "#" : docIcon(item.icon, item.docType ?? "guide");
   return (
     <Link
       id={`search-item-${index}`}
@@ -387,7 +392,7 @@ function ResultRow({
       className={`mx-2 flex items-start gap-3 rounded-[14px] px-3 py-2.5 transition-colors ${active ? "bg-accent-strong text-white" : "text-ink hover:bg-accent-soft"}`}
     >
       <span
-        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] text-[12px] font-semibold ${
+        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] text-[17px] leading-none ${
           active ? "bg-white/20 text-white" : "bg-accent-soft text-accent"
         }`}
       >

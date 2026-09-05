@@ -33,6 +33,15 @@ export const STATUSES = {
 } as const;
 export type Status = keyof typeof STATUSES;
 
+/** 아이콘이 비어 있을 때 쓰는 유형별 기본 이모지 */
+export const DEFAULT_DOC_ICON: Record<DocType, string> = { rule: "📘", guide: "📄", form: "📝", link: "🔗" };
+export const DEFAULT_CATEGORY_ICON = "📁";
+export function docIcon(icon: string | null | undefined, type: DocType) {
+  return icon?.trim() || DEFAULT_DOC_ICON[type] || DEFAULT_DOC_ICON.guide;
+}
+/** 편집 화면 빠른 선택 이모지 */
+export const ICON_CHOICES = ["📄", "📘", "📝", "🔗", "✅", "💡", "⚠️", "📌", "🗓️", "⏰", "🌴", "👶", "💐", "🎂", "🎁", "💳", "💰", "🏅", "🎓", "📚", "🏥", "🩺", "🚕", "🍱", "✈️", "🏠", "🔑", "🔒", "🖨️", "💻", "📱", "🪪", "📇", "🏢", "🤝", "⚖️", "📣", "📞", "🎨", "🌱"];
+
 export const SLUG_PATTERN = /^[a-z0-9가-힣][a-z0-9가-힣-]*$/;
 
 export function isKey<T extends Record<string, unknown>>(obj: T, key: unknown): key is keyof T {

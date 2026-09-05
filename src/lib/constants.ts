@@ -6,12 +6,12 @@ export const DOC_TYPES = {
 } as const;
 export type DocType = keyof typeof DOC_TYPES;
 
-// 회사 표기: enliple 외 3사 한글명은 확정 후 교체
+// 회사 표기 (anic 한글명은 확정 후 교체)
 export const SCOPES = {
   all: "전 계열사",
   enliple: "인라이플",
-  mobisoft: "mobisoft",
-  mobiwith: "mobiwith",
+  mobisoft: "모비소프트",
+  mobiwith: "모비위드",
   anic: "anic",
 } as const;
 export type Scope = keyof typeof SCOPES;

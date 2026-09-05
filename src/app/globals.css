@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/*
+  디자인 토큰
+  - 시안 HTML 의 :root 변수를 그대로 이식하는 자리.
+  - 현재 값은 "신규입사자 To Do List" 온보딩 가이드 HTML 의 :root 값.
+    enliple-wiki-skeleton.html 확보 후 이 블록만 교체하면 전체 색이 바뀐다.
+*/
+:root {
+  --green: #7ac143;
+  --green-deep: #5fa32e;
+  --green-pale: #f1f8e8;
+  --green-line: #dceec7;
+  --ink: #2e3830;
+  --ink-soft: #5c6b60;
+  --paper: #fdfdfb;
+  --card: #ffffff;
+  --red: #e05a47;
+  --radius: 16px;
+}
+
+@theme inline {
+  --color-brand: var(--green);
+  --color-brand-deep: var(--green-deep);
+  --color-brand-pale: var(--green-pale);
+  --color-brand-line: var(--green-line);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-danger: var(--red);
+  --radius-card: var(--radius);
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 공용 컴포넌트 클래스 (Tailwind v4: @apply 에서 재사용하려면 @utility 로 정의) */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+@utility card {
+  @apply bg-card border border-brand-line rounded-card shadow-[0_6px_24px_rgba(122,193,67,0.08)];
+}
+@utility input {
+  @apply w-full rounded-lg border border-brand-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand-line;
+}
+@utility label {
+  @apply block text-xs font-semibold tracking-wide text-ink-soft mb-1;
+}
+@utility badge {
+  @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold leading-tight;
+}
+
+@layer components {
+  .btn-primary {
+    @apply btn bg-brand text-white hover:bg-brand-deep;
+  }
+  .btn-secondary {
+    @apply btn bg-brand-pale text-brand-deep border border-brand-line hover:bg-brand-line;
+  }
+  .btn-ghost {
+    @apply btn text-ink-soft hover:bg-brand-pale hover:text-ink;
+  }
+  .btn-danger {
+    @apply btn text-danger border border-danger/40 hover:bg-danger/10;
+  }
+  .table {
+    @apply w-full text-sm border-collapse;
+  }
+  .table th {
+    @apply text-left text-xs font-semibold text-ink-soft tracking-wide px-3 py-2 border-b border-brand-line whitespace-nowrap;
+  }
+  .table td {
+    @apply px-3 py-2 border-b border-brand-line/70 align-top;
+  }
+}
+
+/* 마크다운 본문 */
+.prose-wiki {
+  line-height: 1.8;
+}
+.prose-wiki > :first-child {
+  margin-top: 0;
+}
+.prose-wiki h1,
+.prose-wiki h2,
+.prose-wiki h3,
+.prose-wiki h4 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  margin: 1.6em 0 0.6em;
+}
+.prose-wiki h1 { font-size: 1.6rem; }
+.prose-wiki h2 { font-size: 1.25rem; color: var(--green-deep); padding-bottom: 0.3em; border-bottom: 1px solid var(--green-line); }
+.prose-wiki h3 { font-size: 1.05rem; }
+.prose-wiki h4 { font-size: 0.95rem; color: var(--ink-soft); }
+.prose-wiki p { margin: 0.7em 0; }
+.prose-wiki ul, .prose-wiki ol { margin: 0.6em 0 0.6em 1.4em; }
+.prose-wiki ul { list-style: disc; }
+.prose-wiki ol { list-style: decimal; }
+.prose-wiki li { margin: 0.25em 0; }
+.prose-wiki li > ul, .prose-wiki li > ol { margin-top: 0.2em; margin-bottom: 0.2em; }
+.prose-wiki a { color: var(--green-deep); text-decoration: underline; text-underline-offset: 2px; }
+.prose-wiki strong { font-weight: 700; }
+.prose-wiki blockquote {
+  margin: 1em 0;
+  padding: 0.6em 1em;
+  border-left: 4px solid var(--green);
+  background: var(--green-pale);
+  border-radius: 0 10px 10px 0;
+  color: var(--ink-soft);
+}
+.prose-wiki blockquote p { margin: 0.2em 0; }
+.prose-wiki code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  background: var(--green-pale);
+  border: 1px solid var(--green-line);
+  border-radius: 5px;
+  padding: 0.05em 0.35em;
+}
+.prose-wiki pre {
+  margin: 1em 0;
+  padding: 0.9em 1em;
+  background: #1f2a22;
+  color: #e8f1e3;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+.prose-wiki pre code { background: none; border: 0; padding: 0; color: inherit; }
+.prose-wiki table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.93em; display: block; overflow-x: auto; }
+.prose-wiki th, .prose-wiki td { border: 1px solid var(--green-line); padding: 0.45em 0.7em; text-align: left; }
+.prose-wiki th { background: var(--green-pale); font-weight: 700; }
+.prose-wiki hr { border: 0; border-top: 1px solid var(--green-line); margin: 1.6em 0; }
+.prose-wiki img { max-width: 100%; border-radius: 10px; }

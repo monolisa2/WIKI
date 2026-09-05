@@ -395,11 +395,11 @@ function ResultRow({
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2">
-          <span className="truncate text-[15px] font-medium">{item.title}</span>
+          <span className="truncate text-[16px] font-medium">{item.title}</span>
           {item.meta ? <span className={`shrink-0 text-[12px] ${active ? "text-white/70" : "text-ink-3"}`}>{item.meta}</span> : null}
         </span>
         {item.subtitle ? (
-          <span className={`hl mt-0.5 block truncate text-[13px] ${active ? "text-white/75" : "text-ink-2"}`}>
+          <span className={`hl mt-0.5 block truncate text-[14px] ${active ? "text-white/80" : "text-ink-2"}`}>
             <Highlight text={item.subtitle} />
           </span>
         ) : null}

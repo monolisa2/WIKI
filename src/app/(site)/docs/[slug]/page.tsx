@@ -83,7 +83,7 @@ export default async function DocumentPage({
         <h1 className="mt-3 text-[32px] font-semibold leading-[1.15] tracking-[-0.025em] sm:text-[40px]">{doc.title}</h1>
         {doc.summary ? <p className="mt-3 text-[17px] leading-relaxed text-ink-2">{doc.summary}</p> : null}
 
-        <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 text-[13px] sm:grid-cols-4">
+        <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 text-[14px] sm:grid-cols-4">
           <Meta label="적용 범위">{scopeLabel(doc.scope)}</Meta>
           <Meta label="담당 부서">{doc.owner_team || "—"}</Meta>
           <Meta label="시행일">{formatDate(doc.effective_date) || "—"}</Meta>
@@ -181,7 +181,7 @@ export default async function DocumentPage({
 function Meta({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[12px] text-ink-3">{label}</dt>
+      <dt className="text-[13px] text-ink-3">{label}</dt>
       <dd className="mt-0.5 font-medium text-ink">{children}</dd>
     </div>
   );

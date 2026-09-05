@@ -12,10 +12,10 @@
   --surface: #ffffff;
   --surface-2: #fafafa;
   --text: #1d1d1f;
-  --text-2: #6e6e73;
-  --text-3: #86868b;
-  --hairline: rgba(0, 0, 0, 0.08);
-  --hairline-strong: rgba(0, 0, 0, 0.16);
+  --text-2: #515154;          /* 보조 텍스트 (대비 7:1 이상) */
+  --text-3: #6e6e73;          /* 메타 텍스트 (대비 5:1 이상) */
+  --hairline: rgba(0, 0, 0, 0.1);
+  --hairline-strong: rgba(0, 0, 0, 0.18);
 
   /* 인라이플 브랜드 그린 */
   --brand: #7ac143;         /* 로고·마크·글로우 */
@@ -75,8 +75,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.65;
   letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -116,7 +116,7 @@ body {
   @apply block text-[12px] font-medium text-ink-2 mb-1.5;
 }
 @utility badge {
-  @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-tight whitespace-nowrap;
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold leading-none whitespace-nowrap;
 }
 @utility kbd {
   @apply inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md border border-hairline-strong bg-surface text-[11px] font-medium text-ink-3 leading-none;
@@ -186,8 +186,13 @@ body {
 
 /* ── 마크다운 본문 ── */
 .prose-wiki {
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 17px;
+  line-height: 1.8;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.prose-wiki :is(h1, h2, h3, h4)[id] {
+  scroll-margin-top: 88px;
 }
 .prose-wiki > :first-child {
   margin-top: 0;
@@ -202,10 +207,11 @@ body {
   margin: 1.8em 0 0.6em;
   color: var(--text);
 }
-.prose-wiki h1 { font-size: 1.7rem; }
-.prose-wiki h2 { font-size: 1.3rem; padding-bottom: 0.4em; border-bottom: 1px solid var(--brand-line); }
-.prose-wiki h3 { font-size: 1.08rem; }
-.prose-wiki h4 { font-size: 0.95rem; color: var(--text-2); }
+.prose-wiki h1 { font-size: 1.75rem; }
+.prose-wiki h2 { font-size: 1.35rem; padding-bottom: 0.45em; border-bottom: 2px solid var(--brand-line); margin-top: 2.2em; }
+.prose-wiki h3 { font-size: 1.1rem; padding-left: 0.65em; border-left: 3px solid var(--brand); margin-top: 1.9em; }
+.prose-wiki h4 { font-size: 1rem; color: var(--text-2); }
+.prose-wiki h2 + h3 { margin-top: 1.1em; }
 .prose-wiki p { margin: 0.75em 0; }
 .prose-wiki ul, .prose-wiki ol { margin: 0.6em 0 0.6em 1.5em; }
 .prose-wiki ul { list-style: disc; }
@@ -225,6 +231,7 @@ body {
   color: var(--text-2);
 }
 .prose-wiki blockquote p { margin: 0.2em 0; }
+.prose-wiki blockquote strong { color: var(--text); }
 .prose-wiki code {
   font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.86em;
@@ -242,9 +249,11 @@ body {
   font-size: 0.9em;
 }
 .prose-wiki pre code { background: none; padding: 0; color: inherit; }
-.prose-wiki table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.93em; display: block; overflow-x: auto; }
-.prose-wiki th, .prose-wiki td { border-bottom: 1px solid var(--hairline); padding: 0.55em 0.8em; text-align: left; }
-.prose-wiki th { font-weight: 600; color: var(--text-2); font-size: 0.9em; }
+.prose-wiki table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.92em; display: block; overflow-x: auto; border: 1px solid var(--hairline); border-radius: 12px; }
+.prose-wiki th, .prose-wiki td { border-bottom: 1px solid var(--hairline); padding: 0.6em 0.85em; text-align: left; vertical-align: top; min-width: 6em; }
+.prose-wiki th { font-weight: 700; color: var(--text); background: var(--brand-soft); font-size: 0.92em; white-space: nowrap; }
+.prose-wiki tbody tr:nth-child(even) td { background: var(--surface-2); }
+.prose-wiki tbody tr:last-child td { border-bottom: 0; }
 .prose-wiki hr { border: 0; border-top: 1px solid var(--hairline); margin: 2em 0; }
 .prose-wiki img { max-width: 100%; border-radius: 14px; }
 .prose-wiki mark, .hl mark {

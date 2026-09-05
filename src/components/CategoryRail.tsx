@@ -38,7 +38,7 @@ export function CategoryRail({ categories }: { categories: RailCategory[] }) {
               <a
                 href={`#cat-${c.slug}`}
                 aria-current={isActive ? "true" : undefined}
-                className={`flex items-center justify-between gap-2 rounded-[10px] px-3 py-1.5 text-[14px] transition-colors ${
+                className={`flex items-center justify-between gap-2 rounded-[10px] px-3 py-2 text-[15px] transition-colors ${
                   isActive ? "bg-accent-soft font-medium text-accent" : "text-ink-2 hover:bg-black/[0.04] hover:text-ink"
                 }`}
               >

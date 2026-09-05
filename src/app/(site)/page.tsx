@@ -79,9 +79,9 @@ export default async function HomePage() {
                       <span aria-hidden className="inline-block h-2.5 w-2.5 rotate-45 rounded-[2px] bg-accent-bright" />
                       {c.name}
                     </h2>
-                    {c.hint ? <p className="mt-0.5 text-[13px] text-ink-2">{c.hint}</p> : null}
+                    {c.hint ? <p className="mt-0.5 text-[14px] text-ink-2">{c.hint}</p> : null}
                   </div>
-                  <span className="text-[13px] tabular-nums text-ink-3">{list.length}건</span>
+                  <span className="text-[14px] tabular-nums text-ink-3">{list.length}건</span>
                 </header>
                 <div className="card overflow-hidden">
                   {list.length ? (

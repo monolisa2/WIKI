@@ -32,7 +32,7 @@ export async function sendMagicLink(_prev: LoginState, formData: FormData): Prom
     return { error: "회사 이메일 계정(@enliple.com 등)으로만 로그인할 수 있습니다." };
   }
 
-  const callback = new URL("/auth/callback", siteUrl());
+  const callback = new URL("/auth/callback", await siteUrl());
   if (next.startsWith("/") && !next.startsWith("//")) callback.searchParams.set("next", next);
 
   const { error } = await supabase.auth.signInWithOtp({

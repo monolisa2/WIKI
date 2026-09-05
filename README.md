@@ -45,7 +45,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 
    ```bash
    cp .env.example .env.local
-   # NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SITE_URL 입력
+   # NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY 입력
    ```
 
 4. 실행

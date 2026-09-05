@@ -83,25 +83,27 @@ Supabase 기본 메일 발송은 **시간당 몇 통 수준으로 제한**되어
 2. 설정
    - Framework Preset: **Next.js** (자동 인식)
    - Root Directory: `./` (그대로)
-   - **Environment Variables** 세 개 입력
+   - **Environment Variables** 두 개 입력
      | Name | Value |
      |---|---|
      | `NEXT_PUBLIC_SUPABASE_URL` | 1단계에서 복사한 Project URL |
-     | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 1단계에서 복사한 anon public 키 |
-     | `NEXT_PUBLIC_SITE_URL` | 일단 `https://enliple-wiki.vercel.app` 처럼 예상 주소를 넣고, 배포 후 실제 주소로 수정 |
+     | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 1단계에서 복사한 anon public 키 (새 대시보드에서는 `sb_publishable_…` 로 시작하는 Publishable key 도 가능) |
+
+     배포 주소는 앱이 요청 헤더에서 자동으로 알아내므로 미리 넣을 필요가 없습니다.
+     (사내 도메인 등으로 고정하고 싶을 때만 `NEXT_PUBLIC_SITE_URL` 추가)
 3. **Deploy** → 1~2분 뒤 `https://<프로젝트>.vercel.app` 주소가 나옵니다.
 4. 배포 브랜치: Vercel 은 기본적으로 `main` 브랜치를 Production 으로 봅니다.
    현재 코드는 `claude/file-reading-collaboration-9unii6` 브랜치에 있으니 둘 중 하나를 선택하세요.
    - GitHub 에서 이 브랜치를 `main` 으로 Pull Request → Merge (권장)
    - 또는 Vercel **Settings → Git → Production Branch** 를 이 브랜치로 지정
 
-## 5. 주소 맞추기 (Supabase ↔ Vercel)
+## 5. 주소 맞추기 (Supabase 에 배포 주소 등록)
 
-배포 주소가 확정되면:
-1. Vercel **Settings → Environment Variables** 에서 `NEXT_PUBLIC_SITE_URL` 을 실제 주소로 수정 → **Redeploy**
-2. Supabase **Authentication → URL Configuration**
-   - `Site URL` 을 배포 주소로
-   - `Redirect URLs` 에 `https://<배포주소>/auth/callback` 추가
+배포 주소가 나오면 Supabase **Authentication → URL Configuration** 에서:
+- `Site URL` 을 배포 주소로 (예: `https://enliple-wiki.vercel.app`)
+- `Redirect URLs` 에 `https://<배포주소>/auth/callback` 추가
+
+Vercel 쪽은 바꿀 것이 없습니다.
 
 ## 6. 첫 로그인과 관리자 지정
 

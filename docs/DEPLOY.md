@@ -59,23 +59,48 @@ supabase/seed/index_stubs.sql                     인덱스 문서 44건 (공개
   - (Vercel 배포 후) `https://<프로젝트>.vercel.app/auth/callback`
   - (사내 도메인 연결 후) `https://wiki.enliple.com/auth/callback` 등
 
-**Authentication → Email Templates → Magic Link** (권장)
+**Authentication → Emails → SMTP Settings** (로그인 안정화를 위해 사실상 필수)
 
-기본 템플릿은 메일을 **요청한 브라우저에서 링크를 열 때만** 로그인이 됩니다.
-휴대폰 메일 앱에서 링크를 열면 실패하므로, 본문의 링크를 아래처럼 바꿔 두는 것을 권장합니다.
+Supabase 기본 메일 발송은 두 가지 한계가 있습니다.
+- 시간당 몇 통 수준으로 발송이 제한되어 여러 명이 로그인하면 메일이 오지 않습니다.
+- 커스텀 SMTP 를 켜기 전에는 메일 템플릿을 수정할 수 없습니다. 기본 템플릿은 "한 번만 쓸 수 있는 링크"만 보내는데,
+  회사 메일의 보안 검사가 링크를 먼저 열어보면 링크가 소모되어 `otp_expired` 오류가 납니다.
 
-```html
-<h2>인라이플 위키 로그인</h2>
-<p>아래 버튼을 누르면 로그인됩니다. 본인이 요청한 것이 아니면 무시하세요.</p>
-<p><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email">로그인</a></p>
+`Enable Custom SMTP` 를 켜고 네이버웍스 메일을 연결합니다.
+
+| 항목 | 값 |
+|---|---|
+| Sender email | 발신에 쓸 실제 네이버웍스 계정 (예: `mcshin@enliple.com`, 가능하면 `wiki@enliple.com` 같은 전용 계정) |
+| Sender name | `인라이플 위키` |
+| Host | `smtp.worksmobile.com` |
+| Port | `465` |
+| Username | Sender email 과 같은 전체 주소 |
+| Password | 그 계정의 네이버웍스 비밀번호. 2단계 인증을 쓰는 계정이면 네이버웍스 **환경설정 → 보안 → 앱 비밀번호** 에서 만든 앱 비밀번호 |
+
+네이버웍스 관리자 콘솔에서 해당 계정의 **IMAP/SMTP(외부 메일 프로그램) 사용**이 허용되어 있어야 합니다.
+저장 후 **Authentication → Rate Limits** 에서 이메일 발송 한도(기본 30/시간)를 필요에 맞게 올립니다.
+
+**Authentication → Emails → Templates → Magic link or OTP** (SMTP 설정 후)
+
+본문을 아래로 바꿉니다. 링크는 눌러야 로그인되는 확인 페이지로 가고(보안 검사가 열어도 소모되지 않음),
+6자리 코드는 로그인 화면에 직접 입력할 수 있어 휴대폰에서 메일을 봐도 됩니다.
+
+Subject:
+```
+[인라이플 위키] 로그인 코드 {{ .Token }}
 ```
 
-**Authentication → SMTP Settings** (실사용 전 필수)
+Body:
+```html
+<h2>인라이플 위키 로그인</h2>
+<p>로그인 화면에 아래 6자리 코드를 입력하세요.</p>
+<p style="font-size:28px;font-weight:700;letter-spacing:6px;margin:12px 0">{{ .Token }}</p>
+<p>또는 이 메일을 요청한 브라우저에서 아래 버튼을 눌러도 됩니다.</p>
+<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">로그인</a></p>
+<p style="color:#6e6e73;font-size:12px">본인이 요청한 것이 아니면 이 메일을 무시하세요. 코드는 1시간 동안 유효합니다.</p>
+```
 
-Supabase 기본 메일 발송은 **시간당 몇 통 수준으로 제한**되어 테스트에는 충분하지만 전사 로그인에는 부족합니다.
-배포 전에 `Enable Custom SMTP` 를 켜고 회사 메일 서버(네이버웍스 SMTP) 또는 발송 서비스(Resend, SendGrid 등)를 연결하세요.
-- 네이버웍스 SMTP: `smtp.worksmobile.com`, 포트 `465`(SSL), 계정은 발신용 회사 메일과 그 비밀번호(또는 앱 비밀번호)
-- Sender email 은 `noreply@enliple.com` 같은 실제 존재하는 회사 주소로
+처음 가입하는 사용자에게 "Confirm sign up" 템플릿이 발송되는 경우가 있으니, 같은 내용으로 **Confirm sign up** 템플릿도 바꿔 둡니다.
 
 ## 4. Vercel 배포
 
@@ -143,6 +168,7 @@ Vercel 쪽은 바꿀 것이 없습니다.
 ## 문제가 생기면
 
 - **로그인 메일이 안 옴**: SMTP 미설정 상태의 발송 제한일 가능성이 높습니다. Authentication → Logs 확인 후 커스텀 SMTP 설정.
-- **링크를 눌렀는데 "로그인 링크가 만료되었거나 올바르지 않습니다"**: Redirect URLs 에 콜백 주소가 없거나, 다른 브라우저에서 열었을 때(기본 템플릿). 3단계의 템플릿 변경으로 해결.
+- **링크를 눌렀는데 `otp_expired` (만료되었거나 이미 사용됨)**: 회사 메일의 보안 검사가 링크를 먼저 열어 소모했거나, 여러 번 요청한 뒤 옛 메일의 링크를 누른 경우. 3단계의 SMTP + 템플릿 변경 후 **6자리 코드 입력**으로 로그인하면 해결.
+- **링크를 눌렀는데 "다른 브라우저에서 열었습니다"**: 기본 템플릿의 링크는 요청한 브라우저에서만 동작. 코드 입력을 사용하거나 같은 브라우저에서 열기.
 - **관리자 버튼이 안 보임**: `profiles.role` 이 `admin` 인지 SQL 로 확인. 변경 후 로그아웃/로그인.
 - **문서가 임직원 화면에 안 보임**: 상태가 `published` 인지 확인. 작성 중(draft) 문서는 관리자만 봅니다.

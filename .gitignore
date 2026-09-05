@@ -25,3 +25,4 @@ supabase/.temp
 
 # 대외비: 규정 전문 seed. 저장소를 Private 으로 바꾼 뒤 git add -f 로 추가
 supabase/seed/regulations.sql
+supabase/seed/welfare_update.sql

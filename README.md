@@ -38,8 +38,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 
    Supabase CLI 를 쓴다면 `supabase init` 후 `supabase db push` 로 migrations 를, `supabase db seed` 또는 psql 로 seed 를 적용한다.
 
-2. Supabase 대시보드 > Authentication > URL Configuration 에서
-   Site URL 과 Redirect URLs 에 `http://localhost:3000/auth/callback` (배포 후 Vercel 도메인도) 을 추가한다.
+2. Supabase 대시보드 > Authentication > Emails 에서 커스텀 SMTP 를 켜고 메일 템플릿을 코드 전용으로 바꾼다 (docs/DEPLOY.md 3단계).
 
 3. 환경변수
 
@@ -63,7 +62,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 
 ## 인증 동작
 
-- 매직링크(`signInWithOtp`) 로그인. 비밀번호 없음.
+- 이메일 코드 로그인 (`signInWithOtp` → `verifyOtp`). 비밀번호 없음. 메일 링크는 회사 메일 보안 검사가 먼저 열어 소모하는 문제가 있어 쓰지 않는다.
 - 가입 허용 도메인은 `allowed_email_domains` 테이블. 로그인 화면에서 먼저 확인하고,
   `auth.users` before-insert 트리거가 최종 차단한다. 현재 `enliple.com` 만 등록 (명세 8번 "4사 도메인 확정" 후 추가).
 - `/admin` 은 `profiles.role = 'admin'` 만 접근. 화면 가드 + RLS 이중 강제.
@@ -102,7 +101,7 @@ src/app/
     docs/[slug]/           문서 상세 · 개정 이력 · 원문 보기 · 제보
   api/search/              통합 검색 API (RLS 적용)
   login/                   매직링크 로그인
-  auth/callback, signout   세션 교환 · 로그아웃
+  auth/signout             로그아웃
   admin/
     page.tsx               대시보드 카운트
     docs/                  문서 목록(필터·정렬·검색) · 새 문서 · 편집 · 개정 이력

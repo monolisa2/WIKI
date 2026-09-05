@@ -53,11 +53,8 @@ supabase/seed/index_stubs.sql                     인덱스 문서 44건 (공개
 - 비밀번호 로그인은 쓰지 않으므로 다른 Provider 는 건드리지 않습니다.
 
 **Authentication → URL Configuration**
-- `Site URL`: 처음에는 `http://localhost:3000`, Vercel 배포 후 배포 주소로 바꿉니다 (5단계).
-- `Redirect URLs` 에 추가:
-  - `http://localhost:3000/auth/callback`
-  - (Vercel 배포 후) `https://<프로젝트>.vercel.app/auth/callback`
-  - (사내 도메인 연결 후) `https://wiki.enliple.com/auth/callback` 등
+- `Site URL`: 배포 주소 (예: `https://enliple-wiki.vercel.app`). 메일 템플릿 변수로 쓰일 수 있어 맞춰 둡니다.
+- `Redirect URLs`: 코드 입력 로그인만 쓰므로 필수는 아닙니다. 비워 두어도 됩니다.
 
 **Authentication → Emails → SMTP Settings** (로그인 안정화를 위해 사실상 필수)
 
@@ -82,28 +79,26 @@ Supabase 기본 메일 발송은 두 가지 한계가 있습니다.
 
 **Authentication → Emails → Templates → Magic link or OTP** (SMTP 설정 후)
 
-본문을 아래로 바꿉니다. 링크는 눌러야 로그인되는 확인 페이지로 가고(보안 검사가 열어도 소모되지 않음),
-6자리 코드는 로그인 화면에 직접 입력할 수 있어 휴대폰에서 메일을 봐도 됩니다.
+로그인은 **메일로 받은 숫자 코드 입력**으로만 합니다. 링크는 회사 메일의 보안 검사가 먼저 열어 소모하는 문제가 있어 쓰지 않습니다.
+Subject 와 Body 를 아래로 바꿉니다.
 
 Subject:
 ```
 [인라이플 위키] 로그인 코드 {{ .Token }}
 ```
 
-Body:
+Body (Source 모드에서 붙여 넣기):
 ```html
 <h2>인라이플 위키 로그인</h2>
-<p>로그인 화면에 아래 6자리 코드를 입력하세요.</p>
+<p>로그인 화면에 아래 코드를 입력하세요.</p>
 <p style="font-size:28px;font-weight:700;letter-spacing:6px;margin:12px 0">{{ .Token }}</p>
-<p>또는 이 메일을 요청한 브라우저에서 아래 버튼을 눌러도 됩니다.</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">로그인</a></p>
 <p style="color:#6e6e73;font-size:12px">본인이 요청한 것이 아니면 이 메일을 무시하세요. 코드는 1시간 동안 유효합니다.</p>
 ```
 
-코드 자릿수는 **Authentication → Sign In / Providers → Email → Email OTP Length** 에서 정합니다 (새 프로젝트 기본값 8).
-6 으로 바꾸면 템플릿 문구의 "6자리"와 맞습니다. 로그인 화면은 6~10자리를 모두 받습니다.
+**Confirm sign up** 템플릿도 같은 내용으로 바꿔 둡니다 (처음 가입하는 사용자에게 이 템플릿이 나갈 수 있음).
 
-처음 가입하는 사용자에게 "Confirm sign up" 템플릿이 발송되는 경우가 있으니, 같은 내용으로 **Confirm sign up** 템플릿도 바꿔 둡니다.
+코드 자릿수는 **Authentication → Sign In / Providers → Email → Email OTP Length** 에서 정합니다 (새 프로젝트 기본값 8).
+로그인 화면은 6~10자리를 모두 받습니다.
 
 ## 4. Vercel 배포
 
@@ -127,15 +122,12 @@ Body:
 
 ## 5. 주소 맞추기 (Supabase 에 배포 주소 등록)
 
-배포 주소가 나오면 Supabase **Authentication → URL Configuration** 에서:
-- `Site URL` 을 배포 주소로 (예: `https://enliple-wiki.vercel.app`)
-- `Redirect URLs` 에 `https://<배포주소>/auth/callback` 추가
-
-Vercel 쪽은 바꿀 것이 없습니다.
+배포 주소가 나오면 Supabase **Authentication → URL Configuration** 의 `Site URL` 을 배포 주소로 맞춥니다
+(예: `https://enliple-wiki.vercel.app`). Vercel 쪽은 바꿀 것이 없습니다.
 
 ## 6. 첫 로그인과 관리자 지정
 
-1. 배포 주소로 접속 → 회사 이메일 입력 → 메일의 로그인 링크 클릭
+1. 배포 주소로 접속 → 회사 이메일 입력 → 메일로 받은 숫자 코드 입력
    - `@enliple.com` 이 아닌 주소는 "회사 이메일 계정으로만 로그인할 수 있습니다" 로 막힙니다.
 2. 로그인 한 번 하면 `profiles` 테이블에 행이 생깁니다. Supabase **SQL Editor** 에서 관리자로 승격:
    ```sql
@@ -171,7 +163,7 @@ Vercel 쪽은 바꿀 것이 없습니다.
 ## 문제가 생기면
 
 - **로그인 메일이 안 옴**: SMTP 미설정 상태의 발송 제한일 가능성이 높습니다. Authentication → Logs 확인 후 커스텀 SMTP 설정.
-- **링크를 눌렀는데 `otp_expired` (만료되었거나 이미 사용됨)**: 회사 메일의 보안 검사가 링크를 먼저 열어 소모했거나, 여러 번 요청한 뒤 옛 메일의 링크를 누른 경우. 3단계의 SMTP + 템플릿 변경 후 **6자리 코드 입력**으로 로그인하면 해결.
-- **링크를 눌렀는데 "다른 브라우저에서 열었습니다"**: 기본 템플릿의 링크는 요청한 브라우저에서만 동작. 코드 입력을 사용하거나 같은 브라우저에서 열기.
+- **코드가 맞지 않거나 만료되었다고 나옴**: 여러 번 요청했다면 가장 마지막 메일의 코드만 유효. 코드는 1시간 유효. 자릿수가 잘리지 않게 그대로 입력.
+- **메일 발송 실패 `535 Username and Password not accepted`**: 네이버웍스는 일반 비밀번호가 아닌 **외부 앱 비밀번호**(환경설정 → 보안)를 SMTP Password 에 넣어야 함.
 - **관리자 버튼이 안 보임**: `profiles.role` 이 `admin` 인지 SQL 로 확인. 변경 후 로그아웃/로그인.
 - **문서가 임직원 화면에 안 보임**: 상태가 `published` 인지 확인. 작성 중(draft) 문서는 관리자만 봅니다.

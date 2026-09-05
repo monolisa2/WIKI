@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { siteUrl } from "@/lib/supabase/env";
+import { siteUrl } from "@/lib/supabase/site-url";
 
 export type LoginState = {
   error?: string;

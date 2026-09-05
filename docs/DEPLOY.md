@@ -23,8 +23,11 @@
 
 ## 2. 스키마 · seed 적용
 
-좌측 **SQL Editor → New query** 에서 아래 파일 내용을 **순서대로** 하나씩 붙여 넣고 Run 합니다.
-각 파일은 한 번에 실행되며, 성공하면 `Success. No rows returned` 가 뜹니다.
+**가장 쉬운 방법**: 좌측 **SQL Editor → New query** 에 `supabase/all_in_one.sql` 파일 내용 전체를 붙여 넣고 **Run** 을 한 번 누릅니다.
+마이그레이션 5개와 seed 3개가 순서대로 들어 있고, 마지막에 확인 표(categories 9 / documents 57)가 결과창에 뜹니다.
+중간에 오류가 나면 전체가 취소되므로 원인을 고친 뒤 다시 전체를 실행하면 됩니다.
+
+파일을 나눠서 적용하고 싶다면 아래 순서대로 하나씩 붙여 넣고 Run 합니다. 성공하면 `Success. No rows returned` 가 뜹니다.
 
 ```
 supabase/migrations/20260905000001_schema.sql     스키마

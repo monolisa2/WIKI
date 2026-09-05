@@ -65,7 +65,7 @@ function CodeForm({ email, next }: { email: string; next?: string }) {
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <div>
           <label htmlFor="token" className="label">
-            메일에 있는 6자리 코드
+            메일에 있는 로그인 코드
           </label>
           <input
             id="token"
@@ -73,9 +73,9 @@ function CodeForm({ email, next }: { email: string; next?: string }) {
             inputMode="numeric"
             autoComplete="one-time-code"
             pattern="[0-9]*"
-            maxLength={6}
-            placeholder="123456"
-            className="input text-center text-[22px] font-semibold tracking-[0.35em]"
+            maxLength={10}
+            placeholder="코드 입력"
+            className="input text-center text-[22px] font-semibold tracking-[0.3em] placeholder:tracking-normal placeholder:text-[15px] placeholder:font-normal"
             autoFocus
           />
         </div>

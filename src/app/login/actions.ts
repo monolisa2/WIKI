@@ -62,7 +62,7 @@ export async function verifyEmailCode(_prev: CodeState, formData: FormData): Pro
   const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   if (!EMAIL_PATTERN.test(email)) return { error: "이메일 주소를 확인해주세요." };
-  if (token.length < 6) return { error: "메일에 있는 6자리 숫자 코드를 입력해주세요." };
+  if (token.length < 6 || token.length > 10) return { error: "메일에 있는 숫자 코드를 그대로 입력해주세요. (6~10자리)" };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });

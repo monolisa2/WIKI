@@ -100,6 +100,9 @@ Body:
 <p style="color:#6e6e73;font-size:12px">본인이 요청한 것이 아니면 이 메일을 무시하세요. 코드는 1시간 동안 유효합니다.</p>
 ```
 
+코드 자릿수는 **Authentication → Sign In / Providers → Email → Email OTP Length** 에서 정합니다 (새 프로젝트 기본값 8).
+6 으로 바꾸면 템플릿 문구의 "6자리"와 맞습니다. 로그인 화면은 6~10자리를 모두 받습니다.
+
 처음 가입하는 사용자에게 "Confirm sign up" 템플릿이 발송되는 경우가 있으니, 같은 내용으로 **Confirm sign up** 템플릿도 바꿔 둡니다.
 
 ## 4. Vercel 배포

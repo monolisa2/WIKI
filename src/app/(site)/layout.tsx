@@ -43,7 +43,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <SiteHeader userLabel={profile?.name ?? user?.email ?? ""} isAdmin={profile?.role === "admin"} />
         <div className="flex-1">{children}</div>
         <footer className="hairline-t">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-6 text-[12px] text-ink-3 sm:px-8">
+          <div className="wrap flex flex-wrap items-center justify-between gap-2 py-6 text-[12px] text-ink-3">
             <span>인라이플 위키 · 인사관리실</span>
             <span>내용이 다를 경우 원문 규정이 우선합니다. 오류·누락은 각 문서 하단에서 제보해주세요.</span>
           </div>

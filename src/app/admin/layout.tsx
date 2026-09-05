@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen">
       <header className="glass hairline-b sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
+        <div className="wrap h-14 flex items-center justify-between gap-6">
           <div className="flex items-center gap-6">
             <BrandMark href="/admin" />
             <span className="badge bg-accent-soft text-accent">관리자</span>
@@ -63,7 +63,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
+      <main className="wrap py-8">{children}</main>
     </div>
   );
 }

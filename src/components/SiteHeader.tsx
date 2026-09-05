@@ -6,7 +6,7 @@ import { HeaderSearch } from "@/components/search/HeaderSearch";
 export function SiteHeader({ userLabel, isAdmin }: { userLabel: string; isAdmin: boolean }) {
   return (
     <header className="glass hairline-b sticky top-0 z-40">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-5 sm:px-8">
+      <div className="wrap flex h-14 items-center gap-4">
         <BrandMark />
         <div className="flex flex-1 justify-center">
           <HeaderSearch />

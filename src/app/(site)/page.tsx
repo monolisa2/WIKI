@@ -44,7 +44,7 @@ export default async function HomePage() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(60%_70%_at_50%_0%,rgba(122,193,67,0.22),transparent_70%)]"
         />
-        <div className="relative mx-auto max-w-6xl px-5 pb-12 pt-16 text-center sm:px-8 sm:pb-16 sm:pt-24">
+        <div className="wrap relative pb-12 pt-16 text-center sm:pb-16 sm:pt-24">
           <h1 className="text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">무엇을 찾으세요?</h1>
           <p className="mx-auto mt-4 max-w-xl text-[17px] text-ink-2 sm:text-[19px]">
             흩어진 규정과 안내 문서가 어디에 있고, 최신인지 한 곳에서 확인합니다.
@@ -63,7 +63,7 @@ export default async function HomePage() {
       </section>
 
       {/* 분류별 목록 */}
-      <section className="mx-auto grid max-w-6xl items-start gap-10 px-5 pb-24 sm:px-8 lg:grid-cols-[200px_minmax(0,1fr)]">
+      <section className="wrap grid items-start gap-10 pb-24 lg:grid-cols-[200px_minmax(0,1fr)]">
         <CategoryRail categories={rail} />
 
         <div className="space-y-12">

@@ -9,6 +9,8 @@ import { scopeLabel, sourceLabel } from "@/components/DocRow";
 import { formatDate, formatDateTime, isStale } from "@/lib/format";
 import type { Document } from "@/lib/types";
 import { submitFeedback } from "./actions";
+import { extractToc } from "@/lib/toc";
+import { DocToc } from "@/components/DocToc";
 
 type DocWithCategory = Document & { categories: { slug: string; name: string } | null };
 type Rev = { version: number; change_note: string | null; revised_at: string };
@@ -58,9 +60,12 @@ export default async function DocumentPage({
   const category = doc.categories;
   const source = sourceLabel(doc.source_system);
   const isLink = doc.doc_type === "link";
+  // 제목이 3개 이상인 긴 문서(규정 전문 등)에만 우측 고정 목차를 붙인다.
+  const toc = isLink ? [] : extractToc(doc.body_md);
+  const hasToc = toc.length >= 3;
 
   return (
-    <article className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+    <article className="wrap py-10 sm:py-14">
       <nav aria-label="경로" className="flex items-center gap-1.5 text-[13px] text-ink-3">
         <Link href="/" className="hover:text-ink">
           홈
@@ -108,72 +113,84 @@ export default async function DocumentPage({
         ) : null}
       </header>
 
-      {isLink ? (
-        <div className="card mt-8 p-8 text-center sm:p-10">
-          <p className="text-[15px] text-ink-2">이 문서는 원문 링크로 제공됩니다.</p>
-          {doc.source_url ? (
-            <a href={doc.source_url} target="_blank" rel="noreferrer" className="btn-primary mt-4 h-11 px-6 text-[15px]">
-              원문 열기 ↗
-            </a>
-          ) : (
-            <p className="mt-2 text-[13px] text-ink-3">원문 URL 이 아직 등록되지 않았습니다.</p>
-          )}
-        </div>
-      ) : (
-        <div className="card mt-8 px-6 py-8 sm:px-10 sm:py-10">
-          {doc.body_md ? <Markdown>{doc.body_md}</Markdown> : <p className="text-[15px] text-ink-3">본문이 아직 등록되지 않았습니다.</p>}
-        </div>
-      )}
-
-      <details className="card mt-6 overflow-hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between px-6 py-4 text-[14px] font-medium [&::-webkit-details-marker]:hidden">
-          <span>개정 이력</span>
-          <span className="text-[13px] font-normal text-ink-3">{revisions.length ? `${revisions.length}개 버전` : "기록 없음"}</span>
-        </summary>
-        {revisions.length ? (
-          <ol className="hairline-t divide-y divide-hairline">
-            {revisions.map((r) => (
-              <li key={r.version} className="flex items-baseline gap-4 px-6 py-3 text-[13px]">
-                <span className="w-9 shrink-0 font-medium tabular-nums">v{r.version}</span>
-                <span className="flex-1 text-ink-2">{r.change_note || "—"}</span>
-                <time className="shrink-0 text-ink-3" dateTime={r.revised_at}>
-                  {formatDateTime(r.revised_at)}
-                </time>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="hairline-t px-6 py-4 text-[13px] text-ink-3">발행 기록이 없습니다.</p>
-        )}
-      </details>
-
-      <section id="feedback" className="card mt-6 scroll-mt-24 p-6">
-        <h2 className="text-[15px] font-semibold">이 문서에 오류나 누락이 있나요?</h2>
-        <p className="mt-1 text-[13px] text-ink-2">알려주시면 인사관리실이 확인하고 반영합니다.</p>
-        {feedback === "sent" ? (
-          <p className="mt-4 rounded-field bg-accent-soft px-4 py-3 text-[14px] text-accent">제보가 접수되었습니다. 감사합니다.</p>
-        ) : (
-          <form action={submitFeedback} className="mt-4 space-y-3">
-            <input type="hidden" name="document_id" value={doc.id} />
-            <input type="hidden" name="slug" value={doc.slug} />
-            <textarea
-              name="message"
-              required
-              minLength={5}
-              maxLength={2000}
-              rows={3}
-              className="input resize-y"
-              placeholder="예: 식권 사용 시간이 바뀐 것 같아요"
-            />
-            {feedback === "error" ? <p className="text-[13px] text-danger">제보를 저장하지 못했습니다. 5자 이상 입력했는지 확인하고 다시 시도해주세요.</p> : null}
-            <div className="flex justify-end">
-              <button type="submit" className="btn-primary">
-                제보하기
-              </button>
+      <div className={`mt-8 ${hasToc ? "lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start lg:gap-10" : ""}`}>
+        <div className="min-w-0">
+          {isLink ? (
+            <div className="card p-8 text-center sm:p-10">
+              <p className="text-[15px] text-ink-2">이 문서는 원문 링크로 제공됩니다.</p>
+              {doc.source_url ? (
+                <a href={doc.source_url} target="_blank" rel="noreferrer" className="btn-primary mt-4 h-11 px-6 text-[15px]">
+                  원문 열기 ↗
+                </a>
+              ) : (
+                <p className="mt-2 text-[13px] text-ink-3">원문 URL 이 아직 등록되지 않았습니다.</p>
+              )}
             </div>
-          </form>
-        )}
-      </section>
+          ) : (
+            <div className="card px-6 py-8 sm:px-10 sm:py-10">
+              {doc.body_md ? <Markdown>{doc.body_md}</Markdown> : <p className="text-[15px] text-ink-3">본문이 아직 등록되지 않았습니다.</p>}
+            </div>
+          )}
+
+          <details className="card mt-6 overflow-hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-6 py-4 text-[14px] font-medium [&::-webkit-details-marker]:hidden">
+              <span>개정 이력</span>
+              <span className="text-[13px] font-normal text-ink-3">{revisions.length ? `${revisions.length}개 버전` : "기록 없음"}</span>
+            </summary>
+            {revisions.length ? (
+              <ol className="hairline-t divide-y divide-hairline">
+                {revisions.map((r) => (
+                  <li key={r.version} className="flex items-baseline gap-4 px-6 py-3 text-[13px]">
+                    <span className="w-9 shrink-0 font-medium tabular-nums">v{r.version}</span>
+                    <span className="flex-1 text-ink-2">{r.change_note || "—"}</span>
+                    <time className="shrink-0 text-ink-3" dateTime={r.revised_at}>
+                      {formatDateTime(r.revised_at)}
+                    </time>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="hairline-t px-6 py-4 text-[13px] text-ink-3">발행 기록이 없습니다.</p>
+            )}
+          </details>
+
+          <section id="feedback" className="card mt-6 scroll-mt-24 p-6">
+            <h2 className="text-[15px] font-semibold">이 문서에 오류나 누락이 있나요?</h2>
+            <p className="mt-1 text-[13px] text-ink-2">알려주시면 인사관리실이 확인하고 반영합니다.</p>
+            {feedback === "sent" ? (
+              <p className="mt-4 rounded-field bg-accent-soft px-4 py-3 text-[14px] text-accent">제보가 접수되었습니다. 감사합니다.</p>
+            ) : (
+              <form action={submitFeedback} className="mt-4 space-y-3">
+                <input type="hidden" name="document_id" value={doc.id} />
+                <input type="hidden" name="slug" value={doc.slug} />
+                <textarea
+                  name="message"
+                  required
+                  minLength={5}
+                  maxLength={2000}
+                  rows={3}
+                  className="input resize-y"
+                  placeholder="예: 식권 사용 시간이 바뀐 것 같아요"
+                />
+                {feedback === "error" ? (
+                  <p className="text-[13px] text-danger">제보를 저장하지 못했습니다. 5자 이상 입력했는지 확인하고 다시 시도해주세요.</p>
+                ) : null}
+                <div className="flex justify-end">
+                  <button type="submit" className="btn-primary">
+                    제보하기
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+        </div>
+
+        {hasToc ? (
+          <aside className="hidden lg:sticky lg:top-20 lg:block">
+            <DocToc items={toc} />
+          </aside>
+        ) : null}
+      </div>
     </article>
   );
 }

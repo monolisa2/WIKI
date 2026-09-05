@@ -97,6 +97,15 @@ body {
   -webkit-backdrop-filter: saturate(180%) blur(24px);
   backdrop-filter: saturate(180%) blur(24px);
 }
+/* 화면 폭을 넓게 쓰는 공용 컨테이너 (풀페이지, 초광폭 모니터에서만 1600px 로 제한) */
+@utility wrap {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  @media (min-width: 640px) { padding-inline: 32px; }
+  @media (min-width: 1280px) { padding-inline: 48px; }
+}
 @utility hairline-b {
   border-bottom: 1px solid var(--hairline);
 }

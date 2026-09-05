@@ -1,38 +1,62 @@
 @import "tailwindcss";
 
 /*
-  디자인 토큰
-  - 시안 HTML 의 :root 변수를 그대로 이식하는 자리.
-  - 현재 값은 "신규입사자 To Do List" 온보딩 가이드 HTML 의 :root 값.
-    enliple-wiki-skeleton.html 확보 후 이 블록만 교체하면 전체 색이 바뀐다.
+  디자인 토큰 — macOS/Apple 스타일
+  중립 회색 바탕, 검정 텍스트, 헤어라인 보더, 절제된 브랜드 그린 액센트, 유리질(glass) 표면.
+  색은 이 블록에서만 바꾼다.
 */
 :root {
-  --green: #7ac143;
-  --green-deep: #5fa32e;
-  --green-pale: #f1f8e8;
-  --green-line: #dceec7;
-  --ink: #2e3830;
-  --ink-soft: #5c6b60;
-  --paper: #fdfdfb;
-  --card: #ffffff;
-  --red: #e05a47;
-  --radius: 16px;
+  color-scheme: light;
+
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --text-3: #86868b;
+  --hairline: rgba(0, 0, 0, 0.08);
+  --hairline-strong: rgba(0, 0, 0, 0.16);
+
+  --accent: #3f7f21;        /* 브랜드 그린 (본문 링크용, 대비 4.5:1 이상) */
+  --accent-strong: #5fa32e; /* 브랜드 그린 (마크·포커스링) */
+  --accent-soft: #eef7e6;
+  --danger: #d70015;
+  --warn: #9a5b00;
+  --warn-soft: #fff4e0;
+
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-strong: rgba(255, 255, 255, 0.86);
 }
 
 @theme inline {
-  --color-brand: var(--green);
-  --color-brand-deep: var(--green-deep);
-  --color-brand-pale: var(--green-pale);
-  --color-brand-line: var(--green-line);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-paper: var(--paper);
-  --color-card: var(--card);
-  --color-danger: var(--red);
-  --radius-card: var(--radius);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --radius-card: 20px;
+  --radius-field: 12px;
+  --radius-tile: 14px;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.03);
+  --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 24px 80px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.08);
+
   --font-sans:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
-    "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui,
+    "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+
+  --ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 html {
@@ -40,58 +64,122 @@ html {
 }
 
 body {
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-sans);
-  line-height: 1.7;
   font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* 공용 컴포넌트 클래스 (Tailwind v4: @apply 에서 재사용하려면 @utility 로 정의) */
+::selection {
+  background: rgba(95, 163, 46, 0.22);
+}
+
+/* ── 공용 유틸리티 (Tailwind v4: @apply 에서 재사용하려면 @utility) ── */
+@utility glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+@utility glass-strong {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+}
+@utility hairline-b {
+  border-bottom: 1px solid var(--hairline);
+}
+@utility hairline-t {
+  border-top: 1px solid var(--hairline);
+}
 @utility btn {
-  @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-medium leading-none transition-[background-color,color,box-shadow,transform] duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
 }
 @utility card {
-  @apply bg-card border border-brand-line rounded-card shadow-[0_6px_24px_rgba(122,193,67,0.08)];
+  @apply bg-surface rounded-card border border-hairline shadow-soft;
 }
 @utility input {
-  @apply w-full rounded-lg border border-brand-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand-line;
+  @apply w-full rounded-field border border-hairline-strong bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-ink-3 outline-none transition-[border-color,box-shadow] duration-200 focus:border-accent-strong focus:ring-4 focus:ring-accent-strong/15;
 }
 @utility label {
-  @apply block text-xs font-semibold tracking-wide text-ink-soft mb-1;
+  @apply block text-[12px] font-medium text-ink-2 mb-1.5;
 }
 @utility badge {
-  @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold leading-tight;
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-tight whitespace-nowrap;
+}
+@utility kbd {
+  @apply inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md border border-hairline-strong bg-surface text-[11px] font-medium text-ink-3 leading-none;
 }
 
 @layer components {
   .btn-primary {
-    @apply btn bg-brand text-white hover:bg-brand-deep;
+    @apply btn bg-ink text-white hover:bg-black;
   }
   .btn-secondary {
-    @apply btn bg-brand-pale text-brand-deep border border-brand-line hover:bg-brand-line;
+    @apply btn bg-surface text-ink border border-hairline-strong hover:bg-surface-2;
   }
   .btn-ghost {
-    @apply btn text-ink-soft hover:bg-brand-pale hover:text-ink;
+    @apply btn text-ink-2 hover:bg-black/5 hover:text-ink;
   }
   .btn-danger {
-    @apply btn text-danger border border-danger/40 hover:bg-danger/10;
+    @apply btn text-danger hover:bg-danger/8;
   }
   .table {
-    @apply w-full text-sm border-collapse;
+    @apply w-full text-[14px] border-collapse;
   }
   .table th {
-    @apply text-left text-xs font-semibold text-ink-soft tracking-wide px-3 py-2 border-b border-brand-line whitespace-nowrap;
+    @apply text-left text-[12px] font-medium text-ink-2 px-4 py-2.5 border-b border-hairline whitespace-nowrap;
   }
   .table td {
-    @apply px-3 py-2 border-b border-brand-line/70 align-top;
+    @apply px-4 py-3 border-b border-hairline align-top;
+  }
+  .table tr:last-child td {
+    border-bottom: 0;
   }
 }
 
-/* 마크다운 본문 */
+/* ── 모션 ── */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-pop {
+  animation: pop-in 0.22s var(--ease-apple) both;
+}
+.animate-fade {
+  animation: fade-in 0.18s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop,
+  .animate-fade {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ── 마크다운 본문 ── */
 .prose-wiki {
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.75;
 }
 .prose-wiki > :first-child {
   margin-top: 0;
@@ -100,51 +188,60 @@ body {
 .prose-wiki h2,
 .prose-wiki h3,
 .prose-wiki h4 {
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-  margin: 1.6em 0 0.6em;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin: 1.8em 0 0.6em;
+  color: var(--text);
 }
-.prose-wiki h1 { font-size: 1.6rem; }
-.prose-wiki h2 { font-size: 1.25rem; color: var(--green-deep); padding-bottom: 0.3em; border-bottom: 1px solid var(--green-line); }
-.prose-wiki h3 { font-size: 1.05rem; }
-.prose-wiki h4 { font-size: 0.95rem; color: var(--ink-soft); }
-.prose-wiki p { margin: 0.7em 0; }
-.prose-wiki ul, .prose-wiki ol { margin: 0.6em 0 0.6em 1.4em; }
+.prose-wiki h1 { font-size: 1.7rem; }
+.prose-wiki h2 { font-size: 1.3rem; padding-bottom: 0.4em; border-bottom: 1px solid var(--hairline); }
+.prose-wiki h3 { font-size: 1.08rem; }
+.prose-wiki h4 { font-size: 0.95rem; color: var(--text-2); }
+.prose-wiki p { margin: 0.75em 0; }
+.prose-wiki ul, .prose-wiki ol { margin: 0.6em 0 0.6em 1.5em; }
 .prose-wiki ul { list-style: disc; }
 .prose-wiki ol { list-style: decimal; }
-.prose-wiki li { margin: 0.25em 0; }
+.prose-wiki li { margin: 0.3em 0; }
+.prose-wiki li::marker { color: var(--text-3); }
 .prose-wiki li > ul, .prose-wiki li > ol { margin-top: 0.2em; margin-bottom: 0.2em; }
-.prose-wiki a { color: var(--green-deep); text-decoration: underline; text-underline-offset: 2px; }
-.prose-wiki strong { font-weight: 700; }
+.prose-wiki a { color: var(--accent); text-decoration: none; }
+.prose-wiki a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.prose-wiki strong { font-weight: 600; }
 .prose-wiki blockquote {
-  margin: 1em 0;
-  padding: 0.6em 1em;
-  border-left: 4px solid var(--green);
-  background: var(--green-pale);
-  border-radius: 0 10px 10px 0;
-  color: var(--ink-soft);
+  margin: 1.2em 0;
+  padding: 0.8em 1.1em;
+  border-left: 3px solid var(--accent-strong);
+  background: var(--surface-2);
+  border-radius: 0 12px 12px 0;
+  color: var(--text-2);
 }
 .prose-wiki blockquote p { margin: 0.2em 0; }
 .prose-wiki code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.875em;
-  background: var(--green-pale);
-  border: 1px solid var(--green-line);
-  border-radius: 5px;
-  padding: 0.05em 0.35em;
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
 }
 .prose-wiki pre {
-  margin: 1em 0;
-  padding: 0.9em 1em;
-  background: #1f2a22;
-  color: #e8f1e3;
-  border-radius: 10px;
+  margin: 1.2em 0;
+  padding: 1em 1.2em;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  border-radius: 14px;
   overflow-x: auto;
+  font-size: 0.9em;
 }
-.prose-wiki pre code { background: none; border: 0; padding: 0; color: inherit; }
-.prose-wiki table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.93em; display: block; overflow-x: auto; }
-.prose-wiki th, .prose-wiki td { border: 1px solid var(--green-line); padding: 0.45em 0.7em; text-align: left; }
-.prose-wiki th { background: var(--green-pale); font-weight: 700; }
-.prose-wiki hr { border: 0; border-top: 1px solid var(--green-line); margin: 1.6em 0; }
-.prose-wiki img { max-width: 100%; border-radius: 10px; }
+.prose-wiki pre code { background: none; padding: 0; color: inherit; }
+.prose-wiki table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.93em; display: block; overflow-x: auto; }
+.prose-wiki th, .prose-wiki td { border-bottom: 1px solid var(--hairline); padding: 0.55em 0.8em; text-align: left; }
+.prose-wiki th { font-weight: 600; color: var(--text-2); font-size: 0.9em; }
+.prose-wiki hr { border: 0; border-top: 1px solid var(--hairline); margin: 2em 0; }
+.prose-wiki img { max-width: 100%; border-radius: 14px; }
+.prose-wiki mark, .hl mark {
+  background: rgba(95, 163, 46, 0.2);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 0.1em;
+}

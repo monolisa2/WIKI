@@ -58,8 +58,8 @@ export default async function AdminDashboard() {
       <ul className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-5">
         {tiles.map((t) => (
           <li key={t.label}>
-            <Link href={t.href} className="card block p-4 hover:border-brand transition-colors">
-              <p className="text-xs font-semibold text-ink-soft">{t.label}</p>
+            <Link href={t.href} className="card block p-4 hover:border-hairline-strong transition-colors">
+              <p className="text-xs font-semibold text-ink-2">{t.label}</p>
               <p className="mt-1 text-2xl font-black tabular-nums">{t.value}</p>
             </Link>
           </li>
@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
       </ul>
 
       <section className="mt-10">
-        <h2 className="text-sm font-bold text-ink-soft tracking-wide">최근 수정</h2>
+        <h2 className="text-sm font-bold text-ink-2 tracking-wide">최근 수정</h2>
         <div className="card mt-3 overflow-x-auto">
           <table className="table">
             <thead>
@@ -81,7 +81,7 @@ export default async function AdminDashboard() {
             <tbody>
               {recent.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center text-ink-soft py-8">
+                  <td colSpan={4} className="text-center text-ink-2 py-8">
                     아직 문서가 없습니다.
                   </td>
                 </tr>
@@ -89,15 +89,15 @@ export default async function AdminDashboard() {
                 recent.map((d) => (
                   <tr key={d.id}>
                     <td>
-                      <Link href={`/admin/docs/${d.id}`} className="font-semibold hover:text-brand-deep">
+                      <Link href={`/admin/docs/${d.id}`} className="font-semibold hover:text-accent">
                         {d.title}
                       </Link>
                     </td>
-                    <td className="text-ink-soft">{d.categories?.name}</td>
+                    <td className="text-ink-2">{d.categories?.name}</td>
                     <td>
                       <StatusBadge status={d.status} />
                     </td>
-                    <td className="text-ink-soft whitespace-nowrap">{formatDateTime(d.updated_at)}</td>
+                    <td className="text-ink-2 whitespace-nowrap">{formatDateTime(d.updated_at)}</td>
                   </tr>
                 ))
               )}

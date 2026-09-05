@@ -53,7 +53,7 @@ export default async function EditDocumentPage({ params, searchParams }: { param
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs text-ink-soft">
+          <div className="flex items-center gap-2 text-xs text-ink-2">
             <Link href="/admin/docs" className="hover:text-ink">
               문서
             </Link>
@@ -61,7 +61,7 @@ export default async function EditDocumentPage({ params, searchParams }: { param
             <span className="font-mono">{doc.slug}</span>
           </div>
           <h1 className="mt-1 text-xl font-black tracking-tight truncate">{doc.title}</h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-soft">
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-2">
             <StatusBadge status={doc.status} />
             {rev ? (
               <span>
@@ -116,7 +116,7 @@ export default async function EditDocumentPage({ params, searchParams }: { param
       {q.error ? <Notice tone="error">{q.error}</Notice> : null}
 
       {/* 발행: 저장된 내용을 스냅샷으로 남기고 published 로 전환 */}
-      <form action={publishDocument} className="card mt-6 p-4 flex flex-wrap items-end gap-3 border-brand">
+      <form action={publishDocument} className="card mt-6 p-4 flex flex-wrap items-end gap-3 border-hairline-strong">
         <input type="hidden" name="id" value={doc.id} />
         <div className="flex-1 min-w-[240px]">
           <label className="label" htmlFor="change_note">
@@ -127,7 +127,7 @@ export default async function EditDocumentPage({ params, searchParams }: { param
         <button type="submit" className="btn-primary">
           {doc.status === "published" ? "개정 발행" : "발행"}
         </button>
-        <p className="w-full text-[11px] text-ink-soft -mt-1">
+        <p className="w-full text-[11px] text-ink-2 -mt-1">
           발행은 <strong>저장된</strong> 내용을 기준으로 합니다. 아래 폼을 수정했다면 먼저 저장해주세요.
         </p>
       </form>
@@ -141,6 +141,6 @@ export default async function EditDocumentPage({ params, searchParams }: { param
 
 function Notice({ tone, children }: { tone: "ok" | "error"; children: React.ReactNode }) {
   return (
-    <p className={`mt-4 text-sm rounded-lg px-4 py-2 ${tone === "ok" ? "bg-brand-pale text-brand-deep" : "bg-danger/10 text-danger"}`}>{children}</p>
+    <p className={`mt-4 text-sm rounded-lg px-4 py-2 ${tone === "ok" ? "bg-accent-soft text-accent" : "bg-danger/8 text-danger"}`}>{children}</p>
   );
 }

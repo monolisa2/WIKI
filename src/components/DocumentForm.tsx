@@ -111,7 +111,7 @@ export function DocumentForm({
                 placeholder="예: annual-leave"
                 required
               />
-              <p className="mt-1 text-[11px] text-ink-soft">/docs/{v.slug || "…"}</p>
+              <p className="mt-1 text-[11px] text-ink-2">/docs/{v.slug || "…"}</p>
             </div>
             <div>
               <label className="label" htmlFor="owner_team">
@@ -144,12 +144,12 @@ export function DocumentForm({
           </div>
 
           {isLink ? (
-            <p className="text-sm text-ink-soft bg-brand-pale rounded-lg p-4">
+            <p className="text-sm text-ink-2 bg-accent-soft rounded-lg p-4">
               링크 문서는 본문 없이 <strong>원문 URL</strong> 만 저장합니다. 우측 패널에서 URL 을 입력해주세요.
             </p>
           ) : preview ? (
-            <div className="min-h-[420px] rounded-lg border border-brand-line p-5">
-              {v.body_md.trim() ? <Markdown>{v.body_md}</Markdown> : <p className="text-sm text-ink-soft">본문이 비어 있습니다.</p>}
+            <div className="min-h-[420px] rounded-lg border border-hairline p-5">
+              {v.body_md.trim() ? <Markdown>{v.body_md}</Markdown> : <p className="text-sm text-ink-2">본문이 비어 있습니다.</p>}
             </div>
           ) : (
             <textarea
@@ -201,7 +201,7 @@ export function DocumentForm({
             <div className="grid grid-cols-2 gap-1.5 text-sm">
               {(Object.keys(SCOPES) as Scope[]).map((s) => (
                 <label key={s} className="inline-flex items-center gap-2">
-                  <input type="checkbox" name="scope" value={s} checked={v.scope.includes(s)} onChange={(e) => toggleScope(s, e.target.checked)} className="accent-brand" />
+                  <input type="checkbox" name="scope" value={s} checked={v.scope.includes(s)} onChange={(e) => toggleScope(s, e.target.checked)} className="accent-accent-strong" />
                   {SCOPES[s]}
                 </label>
               ))}
@@ -243,7 +243,7 @@ export function DocumentForm({
               <input id="revised_date" name="revised_date" type="date" className="input" value={v.revised_date} onChange={(e) => set("revised_date", e.target.value)} />
             </div>
           </div>
-          <p className="text-[11px] text-ink-soft -mt-2">개정일이 비어 있으면 임직원 화면에 &quot;내용 수집 필요&quot;로 표시됩니다.</p>
+          <p className="text-[11px] text-ink-2 -mt-2">개정일이 비어 있으면 임직원 화면에 &quot;내용 수집 필요&quot;로 표시됩니다.</p>
 
           <div className="grid grid-cols-2 gap-3 items-end">
             <div>
@@ -253,13 +253,13 @@ export function DocumentForm({
               <input id="sort_order" name="sort_order" type="number" className="input" value={v.sort_order} onChange={(e) => set("sort_order", e.target.value)} />
             </div>
             <label className="inline-flex items-center gap-2 text-sm pb-2">
-              <input type="checkbox" name="is_pinned" checked={v.is_pinned} onChange={(e) => set("is_pinned", e.target.checked)} className="accent-brand" />
+              <input type="checkbox" name="is_pinned" checked={v.is_pinned} onChange={(e) => set("is_pinned", e.target.checked)} className="accent-accent-strong" />
               상단 고정
             </label>
           </div>
         </div>
 
-        {state.error ? <p className="text-sm text-danger card p-3 border-danger/40">{state.error}</p> : null}
+        {state.error ? <p className="text-sm text-danger card p-3 border-danger/30">{state.error}</p> : null}
 
         <div className="flex items-center gap-2">
           <button type="submit" className="btn-primary flex-1" disabled={pending}>
@@ -269,7 +269,7 @@ export function DocumentForm({
             취소
           </Link>
         </div>
-        {!docId ? <p className="text-[11px] text-ink-soft">저장 후 편집 화면에서 &quot;발행&quot;하면 임직원에게 공개되고 개정 이력이 남습니다.</p> : null}
+        {!docId ? <p className="text-[11px] text-ink-2">저장 후 편집 화면에서 &quot;발행&quot;하면 임직원에게 공개되고 개정 이력이 남습니다.</p> : null}
       </aside>
     </form>
   );

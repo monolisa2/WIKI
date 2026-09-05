@@ -34,7 +34,7 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-xs text-ink-soft">
+      <div className="flex items-center gap-2 text-xs text-ink-2">
         <Link href="/admin/docs" className="hover:text-ink">
           문서
         </Link>
@@ -48,7 +48,7 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
       <h1 className="mt-1 text-xl font-black tracking-tight">개정 이력</h1>
 
       {revisions.length === 0 ? (
-        <p className="card mt-6 p-8 text-center text-sm text-ink-soft">
+        <p className="card mt-6 p-8 text-center text-sm text-ink-2">
           아직 발행된 버전이 없습니다.{" "}
           <Link href={`/admin/docs/${doc.id}`} className="underline">
             편집 화면
@@ -57,18 +57,18 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
         </p>
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] items-start">
-          <ol className="card divide-y divide-brand-line">
+          <ol className="card divide-y divide-hairline">
             {revisions.map((r) => {
               const active = r.id === selected?.id;
               return (
-                <li key={r.id} className={active ? "bg-brand-pale/60" : ""}>
-                  <Link href={`/admin/docs/${doc.id}/revisions?v=${r.version}`} className="block px-4 py-3 hover:bg-brand-pale/40">
+                <li key={r.id} className={active ? "bg-black/[0.04]" : ""}>
+                  <Link href={`/admin/docs/${doc.id}/revisions?v=${r.version}`} className="block px-4 py-3 hover:bg-black/[0.03]">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-bold">v{r.version}</span>
-                      <span className="text-[11px] text-ink-soft">{formatDateTime(r.revised_at)}</span>
+                      <span className="text-[11px] text-ink-2">{formatDateTime(r.revised_at)}</span>
                     </div>
-                    <p className="mt-0.5 text-xs text-ink-soft truncate">{r.change_note || "(메모 없음)"}</p>
-                    <p className="text-[11px] text-ink-soft">{r.profiles?.name ?? r.profiles?.email ?? ""}</p>
+                    <p className="mt-0.5 text-xs text-ink-2 truncate">{r.change_note || "(메모 없음)"}</p>
+                    <p className="text-[11px] text-ink-2">{r.profiles?.name ?? r.profiles?.email ?? ""}</p>
                   </Link>
                 </li>
               );
@@ -77,12 +77,12 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
 
           {selected ? (
             <div className="card p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-brand-line">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-hairline">
                 <div>
                   <h2 className="font-black">
                     v{selected.version} · {selected.title}
                   </h2>
-                  <p className="text-xs text-ink-soft mt-0.5">{selected.summary}</p>
+                  <p className="text-xs text-ink-2 mt-0.5">{selected.summary}</p>
                 </div>
                 <form action={restoreRevision}>
                   <input type="hidden" name="id" value={doc.id} />
@@ -96,7 +96,7 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
                 </form>
               </div>
               <div className="mt-4">
-                {selected.body_md ? <Markdown>{selected.body_md}</Markdown> : <p className="text-sm text-ink-soft">본문 없음 (링크 문서)</p>}
+                {selected.body_md ? <Markdown>{selected.body_md}</Markdown> : <p className="text-sm text-ink-2">본문 없음 (링크 문서)</p>}
               </div>
             </div>
           ) : null}

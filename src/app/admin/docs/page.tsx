@@ -67,14 +67,14 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-black tracking-tight">문서</h1>
-          <p className="mt-1 text-sm text-ink-soft">{rows.length}건</p>
+          <p className="mt-1 text-sm text-ink-2">{rows.length}건</p>
         </div>
         <Link href={`/admin/docs/new${selectedCategory ? `?category=${selectedCategory.slug}` : ""}`} className="btn-primary">
           + 새 문서
         </Link>
       </div>
 
-      {p.deleted ? <p className="mt-4 text-sm text-brand-deep">문서를 삭제했습니다.</p> : null}
+      {p.deleted ? <p className="mt-4 text-sm text-accent">문서를 삭제했습니다.</p> : null}
       {error ? <p className="mt-4 text-sm text-danger">목록을 불러오지 못했습니다. ({error.message})</p> : null}
 
       <form method="get" className="card mt-6 p-4 grid gap-3 sm:grid-cols-[1fr_10rem_9rem_9rem_9rem_auto] items-end">
@@ -134,7 +134,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           </Link>
         </div>
         {p.source || p.revised ? (
-          <p className="sm:col-span-6 text-xs text-ink-soft">
+          <p className="sm:col-span-6 text-xs text-ink-2">
             추가 필터:
             {p.source ? ` 원본 시스템 = ${SOURCE_SYSTEMS[p.source as keyof typeof SOURCE_SYSTEMS] ?? p.source}` : ""}
             {p.revised === "none" ? " 개정일 없음" : ""}
@@ -161,31 +161,31 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center text-ink-soft py-10">
+                <td colSpan={7} className="text-center text-ink-2 py-10">
                   조건에 맞는 문서가 없습니다.
                 </td>
               </tr>
             ) : (
               rows.map((d) => (
-                <tr key={d.id} className="hover:bg-brand-pale/40">
+                <tr key={d.id} className="hover:bg-black/[0.03]">
                   <td>
-                    <Link href={`/admin/docs/${d.id}`} className="font-semibold hover:text-brand-deep">
-                      {d.is_pinned ? <span className="text-brand-deep mr-1">★</span> : null}
+                    <Link href={`/admin/docs/${d.id}`} className="font-semibold hover:text-accent">
+                      {d.is_pinned ? <span className="text-accent mr-1">★</span> : null}
                       {d.title}
                     </Link>
-                    <div className="text-[11px] text-ink-soft font-mono">{d.slug}</div>
+                    <div className="text-[11px] text-ink-2 font-mono">{d.slug}</div>
                   </td>
-                  <td className="text-ink-soft whitespace-nowrap">{d.categories?.name}</td>
+                  <td className="text-ink-2 whitespace-nowrap">{d.categories?.name}</td>
                   <td className="whitespace-nowrap">{DOC_TYPES[d.doc_type] ?? d.doc_type}</td>
-                  <td className="text-ink-soft whitespace-nowrap">{d.scope.map((s) => SCOPES[s] ?? s).join(", ")}</td>
-                  <td className="text-ink-soft whitespace-nowrap">
+                  <td className="text-ink-2 whitespace-nowrap">{d.scope.map((s) => SCOPES[s] ?? s).join(", ")}</td>
+                  <td className="text-ink-2 whitespace-nowrap">
                     {d.source_system ? SOURCE_SYSTEMS[d.source_system] ?? d.source_system : "—"}
                   </td>
                   <td className="whitespace-nowrap">
                     {d.revised_date ? (
                       <span className={isStale(d.revised_date) ? "text-danger font-semibold" : ""}>{formatDate(d.revised_date)}</span>
                     ) : (
-                      <span className="badge bg-amber-50 text-amber-700 border border-amber-200">내용 수집 필요</span>
+                      <span className="badge bg-warn-soft text-warn">내용 수집 필요</span>
                     )}
                   </td>
                   <td>

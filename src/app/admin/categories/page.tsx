@@ -24,10 +24,10 @@ export default async function CategoriesPage({
   return (
     <div>
       <h1 className="text-xl font-black tracking-tight">분류 관리</h1>
-      <p className="mt-1 text-sm text-ink-soft">임직원 화면 좌측 레일의 순서와 설명을 관리합니다.</p>
+      <p className="mt-1 text-sm text-ink-2">임직원 화면 좌측 레일의 순서와 설명을 관리합니다.</p>
 
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
-      {saved ? <p className="mt-4 text-sm text-brand-deep">저장했습니다.</p> : null}
+      {saved ? <p className="mt-4 text-sm text-accent">저장했습니다.</p> : null}
 
       <div className="card mt-6 overflow-x-auto">
         <table className="table">
@@ -52,14 +52,14 @@ export default async function CategoriesPage({
                     </form>
                     <input form={formId} name="sort_order" type="number" defaultValue={c.sort_order} className="input w-20" />
                   </td>
-                  <td className="font-mono text-xs text-ink-soft pt-3">{c.slug}</td>
+                  <td className="font-mono text-xs text-ink-2 pt-3">{c.slug}</td>
                   <td>
                     <input form={formId} name="name" defaultValue={c.name} className="input" required />
                   </td>
                   <td>
                     <input form={formId} name="hint" defaultValue={c.hint ?? ""} className="input" />
                   </td>
-                  <td className="text-ink-soft pt-3 tabular-nums">{counts.get(c.id) ?? 0}</td>
+                  <td className="text-ink-2 pt-3 tabular-nums">{counts.get(c.id) ?? 0}</td>
                   <td>
                     <button form={formId} type="submit" className="btn-secondary">
                       저장

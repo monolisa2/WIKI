@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="card max-w-sm w-full p-8 text-center">
           <p className="text-lg font-bold">관리자 권한이 필요합니다</p>
-          <p className="mt-2 text-sm text-ink-soft">
+          <p className="mt-2 text-sm text-ink-2">
             {user.email} 계정은 관리자로 등록되어 있지 않습니다. 인사관리실에 권한을 요청해주세요.
           </p>
           <Link href="/" className="btn-secondary mt-6">
@@ -37,11 +37,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-brand-line bg-card">
+      <header className="glass hairline-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
           <div className="flex items-center gap-6">
             <BrandMark href="/admin" />
-            <span className="badge bg-brand-pale text-brand-deep">ADMIN</span>
+            <span className="badge bg-black/[0.06] text-ink-2">관리자</span>
             <nav className="flex items-center gap-1">
               {NAV.map((item) => (
                 <Link key={item.href} href={item.href} className="btn-ghost">
@@ -50,7 +50,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm text-ink-soft">
+          <div className="flex items-center gap-3 text-sm text-ink-2">
             <Link href="/" className="hover:text-ink">
               임직원 화면
             </Link>

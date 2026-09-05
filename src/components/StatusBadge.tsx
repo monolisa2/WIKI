@@ -1,9 +1,9 @@
 import { STATUSES, type Status } from "@/lib/constants";
 
 const STYLES: Record<Status, string> = {
-  draft: "bg-amber-50 text-amber-700 border border-amber-200",
-  published: "bg-brand-pale text-brand-deep border border-brand-line",
-  archived: "bg-gray-100 text-gray-500 border border-gray-200",
+  draft: "bg-warn-soft text-warn",
+  published: "bg-accent-soft text-accent",
+  archived: "bg-black/[0.06] text-ink-3",
 };
 
 export function StatusBadge({ status }: { status: Status }) {

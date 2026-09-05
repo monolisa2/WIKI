@@ -14,8 +14,8 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 | 1 | Supabase 스키마 · RLS · seed (분류 9개 + 문서) | ✅ SQL 작성 (`supabase/`) |
 | 2 | Next.js 프로젝트, 매직링크 인증, 회사 도메인 제한 | ✅ |
 | 3 | `/admin` — 문서 CRUD, 마크다운 미리보기, publish 시 revision 스냅샷 | ✅ (+ 분류 관리, 개정 이력 보기·복원) |
-| 4 | `/` 임직원 화면 — 검색, 분류 목록, 문서 상세 | ⏳ 최소 화면만 |
-| 5 | 대시보드 카운트, 피드백 폼 | 대시보드 카운트 ✅ · 피드백 ⏳ |
+| 4 | `/` 임직원 화면 — 통합 검색, 분류 목록, 문서 상세 | ✅ |
+| 5 | 대시보드 카운트, 피드백 폼 | ✅ |
 | 6 | 온보딩 가이드 HTML → 마크다운 | 1/15 (`supabase/seed/onboarding_todo.sql`) |
 | 7 | Vercel 배포 → 본부장 리뷰 → 사내 도메인 | ⏳ |
 
@@ -28,6 +28,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
    supabase/migrations/20260905000002_auth.sql       -- 허용 도메인 테이블, auth 트리거, is_admin()
    supabase/migrations/20260905000003_rls.sql        -- RLS 정책
    supabase/migrations/20260905000004_functions.sql  -- publish_document(), restore_document_revision()
+   supabase/migrations/20260905000005_search.sql     -- search_documents() 통합 검색
    supabase/seed.sql                                 -- 분류 9개 + 허용 도메인(enliple.com)
    supabase/seed/onboarding_todo.sql                 -- 온보딩 가이드 문서 13건 (draft)
    ```
@@ -71,24 +72,39 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind v4 · M
 - 공개 중인 문서를 수정한 뒤 다시 발행하면 다음 버전이 쌓인다.
 - 개정 이력 화면에서 이전 버전을 **복원**하면 제목·요약·본문이 현재 문서에 덮어써지며, 다시 발행해야 임직원에게 반영된다.
 
-## 디자인 토큰
+## 디자인
 
-`src/app/globals.css` 의 `:root` 블록이 시안 HTML 의 `:root` 변수를 이식하는 자리다.
-지금 값은 온보딩 가이드 HTML(`신규입사자 To Do List`)의 토큰이며, `enliple-wiki-skeleton.html` 확보 후 이 블록만 교체한다.
-Tailwind 유틸리티는 `@theme inline` 으로 같은 변수를 참조하므로(`bg-brand`, `text-ink-soft`, `rounded-card` 등) 색은 한 곳에서만 바꾼다.
+macOS / Apple 스타일을 기준으로 잡았다. 시안 HTML 은 참고용.
+
+- 중립 회색 바탕(`#f5f5f7`), 검정 텍스트, 헤어라인 보더, 둥근 카드, 검정 필(pill) 버튼
+- 브랜드 그린은 링크·마크·포커스링 같은 액센트에만 절제해서 사용
+- 상단 바와 검색 패널은 유리질(`backdrop-filter: saturate(180%) blur(20px)`) 표면
+- 토큰은 `src/app/globals.css` 의 `:root` 한 블록에서만 바꾼다. Tailwind 유틸리티(`bg-surface`, `text-ink-2`, `rounded-card`, `shadow-float` …)는 `@theme inline` 으로 같은 변수를 참조한다.
+- 폰트는 Pretendard Variable (jsdelivr)
+
+### 통합 검색 (Spotlight 방식)
+
+- 헤더의 검색 필드, 홈 상단의 큰 검색 필드, `⌘K` / `Ctrl+K` / `/` 키 어디서든 열린다.
+- 입력 즉시 `/api/search` 를 호출해 문서(제목·요약·본문 전문검색 + 부분일치)와 분류를 한 패널에 보여준다. `↑↓` 이동, `↵` 열기, `esc` 닫기.
+- 검색은 DB 함수 `search_documents()` 가 담당한다. security invoker 라 RLS 가 그대로 적용되어 임직원은 공개 문서만 검색된다.
+- 결과의 하이라이트는 `ts_headline` 의 `⟦ ⟧` 마커를 클라이언트에서 `<mark>` 로 바꿔 그린다 (HTML 은 주입하지 않음).
 
 ## 디렉터리
 
 ```
 src/app/
-  page.tsx                 임직원 홈 (4단계 전 최소 화면)
+  (site)/                  임직원 화면
+    layout.tsx             glass 헤더 + 통합 검색 Provider
+    page.tsx               홈: 히어로 검색, 분류 레일, 분류별 문서 목록
+    docs/[slug]/           문서 상세 · 개정 이력 · 원문 보기 · 제보
+  api/search/              통합 검색 API (RLS 적용)
   login/                   매직링크 로그인
   auth/callback, signout   세션 교환 · 로그아웃
   admin/
     page.tsx               대시보드 카운트
     docs/                  문서 목록(필터·정렬·검색) · 새 문서 · 편집 · 개정 이력
     categories/            분류 관리
-src/components/            DocumentForm(편집+미리보기), Markdown, StatusBadge, ConfirmButton
+src/components/            search/SearchCommand(Spotlight), SiteHeader, CategoryRail, DocRow, DocumentForm, Markdown, 배지류
 src/lib/supabase/          server / client / middleware 클라이언트
 supabase/migrations/       스키마 · 인증 · RLS · 함수
 supabase/seed*.sql         분류 · 문서 seed

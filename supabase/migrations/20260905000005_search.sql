@@ -33,6 +33,8 @@ as $$
     c.slug, c.name,
     (
       (case when d.search_vector @@ q.tsq then ts_rank(d.search_vector, q.tsq) * 4 else 0 end)
+      + (case when lower(d.title) = lower(p_query) then 4.0 else 0 end)                 -- 제목 완전 일치
+      + (case when d.title ilike replace(replace(p_query, '%', '\%'), '_', '\_') || '%' then 1.0 else 0 end)  -- 제목이 검색어로 시작
       + (case when d.title ilike q.pat then 2.0 else 0 end)
       + (case when d.summary ilike q.pat then 1.0 else 0 end)
       + (case when d.body_md ilike q.pat then 0.3 else 0 end)

@@ -24,6 +24,7 @@
 | **연동 블록 렌더러** | 채용 사이트 페이지를 섹션→행→열→블록 구조·이미지·글자 크기·정렬 그대로 그림(`nh-*` CSS). 인라인 HTML 은 `<strong> <em> <br>` 만 남기고 이스케이프. `[[live:ninehire-tabs:a,b,c]]` 는 클라이언트 탭(`LiveTabs.tsx`)으로 페이지 전환. 연동 블록은 `Suspense` 로 감싸 본문이 먼저 뜨고 뒤따라 채워짐 | `src/lib/ninehire.ts`, `src/components/doc/LiveBlock.tsx`, `LiveTabs.tsx`, `DocBody.tsx` |
 | **임베드 블록** | `[[live:embed:approval-kiosk]]` → `public/tools/approval-kiosk.html`(회계팀 배포 HTML, 외부 의존 없음, 108건)을 같은 출처 iframe 으로. `.html` 은 미들웨어 매처에 걸려 로그인 필수. 새 도구는 `EMBEDS` 에 추가 | `src/lib/live-blocks.ts`, `LiveBlock.tsx` |
 | 표 렌더링 | 마크다운 표를 `.table-wrap` 으로 감싸 테두리·배경이 내용 폭만큼만 그려지던(잘린 듯 보이던) 문제 해결 | `Markdown.tsx`, `globals.css` |
+| 관리자 계정 관리 | `/admin/users`: 로그인한 계정의 role 토글(본인 제외), 로그인 전 이메일 예약(`admin_invites`, 허용 도메인만). RLS 는 003 의 profiles admin update 정책 + 009 | `src/app/admin/users/*` |
 | 미공개 문서 링크 | 본문이 링크한 문서가 현재 사용자에게 보이지 않으면(초안 등) 링크 대신 회색 글자 + "준비 중" 칩. 문서 페이지가 링크된 slug 를 RLS 하에서 조회해 없는 것을 `missingSlugs` 로 넘김 | `src/app/(site)/docs/[slug]/page.tsx`, `src/components/Markdown.tsx` |
 
 ## DB 상태 (사용자가 SQL Editor 에서 실행한 순서)
@@ -38,6 +39,7 @@
 8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
 9. `batch7_update.sql` — 계열사 구조의 회사별 소개를 `[[live:ninehire-tabs:…]]` 탭 하나로
 12. **`supabase/migrations/20260907000008_search_rank.sql`** — 검색 순위: 규정 전문보다 안내·양식 +0.5, 필독 +0.3 (SQL Editor 에서 실행)
+15. **`supabase/migrations/20260907000009_admin_invites.sql`** — 관리자 예약 테이블(`admin_invites`) + 첫 로그인 시 admin 부여 + 예약 즉시 승격 트리거. `/admin/users` 화면(관리자 토글·예약)과 짝
 14. **`batch11_update.sql`** — 열일레터 '자동 추가' 문장 제거, 인라이플 컬처를 `culture@0-1`(배너·일하는 방식만)로. 코드: 연동 블록의 출처·갱신 안내 문구 제거, 채용 사이트 내부로 가는 이미지·버튼(지원하기·채용공고) 자동 제외(`isRecruitLink`), `page@a-b` 섹션 범위 문법, 작은 아이콘 104px
 13. **`batch10_update.sql`** — 주제별 안내 26건의 doc_type 을 rule → guide 로(규정 배지는 규정 전문 14건에만), 규정 전문 아이콘 📘 통일
 11. **`batch9_update.sql`** — 네이버웍스 공지 반영: `condolence-flowers`(경조화환 발송 기준, 총무팀 2026-07-01), `childcare-tax-exemption`(보육수당 비과세, 인사관리실 2026-07-02), `amaranth-guide`(아마란스10 가이드 ver.1 요약, 스텁 채움), `approval-authority`(위임전결 기준·결재라인, 회계팀 2026-07-01, 조회 도구 임베드), `family-events` 화환 행에 신청 경로·링크 추가. 첨부 5개는 `wiki_attachments_batch9.zip` 을 `/admin/files` 에서 일괄 등록

@@ -6,13 +6,13 @@ export const DOC_TYPES = {
 } as const;
 export type DocType = keyof typeof DOC_TYPES;
 
-// 회사 표기 (애닉은 사내 리크루팅 포스터의 anick.io 표기 기준, 공식 한글명 확인 필요)
+// 회사 표기 (에이닉: 채용 사이트·언론 보도 표기 기준. 코드 anic 은 DB 값이라 유지)
 export const SCOPES = {
   all: "전 계열사",
   enliple: "인라이플",
   mobisoft: "모비소프트",
   mobiwith: "모비위드",
-  anic: "애닉",
+  anic: "에이닉",
 } as const;
 export type Scope = keyof typeof SCOPES;
 

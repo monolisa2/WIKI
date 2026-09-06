@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { DOC_TYPES, docIcon, type DocType } from "@/lib/constants";
 import { CALLOUT_KINDS, type CalloutKind } from "@/lib/remark-callouts";
 import { extractToc } from "@/lib/toc";
+import { LIVE_KINDS, NINEHIRE_PAGES, liveTokenText, type LiveKind, type NinehirePage } from "@/lib/live-blocks";
 
 /* ────────────────────────────────────────────────────────────────
    관리자용 마크다운 편집기
@@ -39,7 +40,7 @@ export function MarkdownEditor({
 }) {
   const ta = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useState<Mode>("split");
-  const [dialog, setDialog] = useState<null | "table" | "link" | "doc" | "article" | "callout">(null);
+  const [dialog, setDialog] = useState<null | "table" | "link" | "doc" | "article" | "callout" | "live">(null);
   const pendingSel = useRef<Selection | null>(null);
 
   // 값이 바뀐 뒤 커서 위치를 되돌린다
@@ -177,6 +178,11 @@ export function MarkdownEditor({
             외부 링크
           </Tool>
         </ToolGroup>
+        <ToolGroup>
+          <Tool onClick={() => setDialog("live")} hint="채용 사이트(열일레터·뉴스·채용 공고·회사 소개)의 최신 내용이 자동으로 들어오는 자리 만들기">
+            🔄 연동 블록
+          </Tool>
+        </ToolGroup>
         <div className="ml-auto flex items-center gap-0.5 rounded-full bg-black/[0.05] p-0.5 text-[12px]">
           {(["edit", "split", "preview"] as Mode[]).map((m) => (
             <button
@@ -265,6 +271,15 @@ export function MarkdownEditor({
           }}
         />
       ) : null}
+      {dialog === "live" ? (
+        <LiveBlockDialog
+          onClose={() => setDialog(null)}
+          onInsert={(token) => {
+            insertBlock(token);
+            setDialog(null);
+          }}
+        />
+      ) : null}
       {dialog === "article" ? (
         <ArticlePickerDialog
           onClose={() => setDialog(null)}
@@ -322,6 +337,54 @@ function Dialog({ title, onClose, children, wide = false }: { title: string; onC
         {children}
       </div>
     </div>
+  );
+}
+
+function LiveBlockDialog({ onClose, onInsert }: { onClose: () => void; onInsert: (token: string) => void }) {
+  const [page, setPage] = useState<NinehirePage>("culture");
+  const kinds = Object.keys(LIVE_KINDS) as LiveKind[];
+  return (
+    <Dialog title="연동 블록 넣기" onClose={onClose}>
+      <p className="text-[13px] text-ink-2">
+        채용 사이트(enliple.ninehire.site)의 내용을 그 자리에 자동으로 보여줍니다. 채용 사이트가 바뀌면 위키도 1시간 안에 따라 바뀝니다.
+      </p>
+      <ul className="mt-3 space-y-1.5">
+        {kinds.map((k) => (
+          <li key={k}>
+            {k === "ninehire-page" ? (
+              <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-hairline px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[14px] font-medium">{LIVE_KINDS[k].label}</div>
+                  <div className="text-[12px] text-ink-3">{LIVE_KINDS[k].hint}</div>
+                </div>
+                <select value={page} onChange={(e) => setPage(e.target.value as NinehirePage)} className="input h-8! w-auto! py-0 text-[13px]" aria-label="페이지">
+                  {(Object.keys(NINEHIRE_PAGES) as NinehirePage[]).map((p) => (
+                    <option key={p} value={p}>
+                      {NINEHIRE_PAGES[p]}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" className="btn-secondary h-8 px-3 text-[12.5px]" onClick={() => onInsert(liveTokenText(k, page))}>
+                  넣기
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onInsert(liveTokenText(k))}
+                className="flex w-full items-center gap-3 rounded-[10px] border border-hairline px-3 py-2 text-left hover:bg-accent-soft"
+              >
+                <span aria-hidden>🔄</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14px] font-medium">{LIVE_KINDS[k].label}</span>
+                  <span className="block text-[12px] text-ink-3">{LIVE_KINDS[k].hint}</span>
+                </span>
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </Dialog>
   );
 }
 

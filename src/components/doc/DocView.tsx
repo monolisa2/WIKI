@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Markdown } from "@/components/Markdown";
+import { DocBody } from "@/components/doc/DocBody";
 import { TypeBadge } from "@/components/TypeBadge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DocToc } from "@/components/DocToc";
@@ -22,12 +22,15 @@ export function DocView({
   doc,
   revisions,
   attachments = [],
+  missingSlugs = [],
   feedback,
   feedbackAction,
 }: {
   doc: DocViewDocument;
   revisions: DocViewRevision[];
   attachments?: Attachment[];
+  /** 본문이 링크하지만 아직 공개되지 않은 문서 slug (링크 대신 "준비 중" 표시) */
+  missingSlugs?: string[];
   feedback?: string;
   feedbackAction: (formData: FormData) => void | Promise<void>;
 }) {
@@ -115,7 +118,7 @@ export function DocView({
                 )}
               </div>
             ) : doc.body_md ? (
-              <Markdown>{doc.body_md}</Markdown>
+              <DocBody bodyMd={doc.body_md} missingSlugs={missingSlugs} />
             ) : (
               <div className="callout callout-plain" data-emoji="🟠" role="note">
                 <p>본문이 아직 등록되지 않았습니다. 제목과 위치만 먼저 등록한 문서입니다.</p>

@@ -67,7 +67,7 @@
   --shadow-float: 0 24px 80px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.08);
 
   --font-sans:
-    "Noto Sans KR Variable", "Noto Sans KR", -apple-system, BlinkMacSystemFont, system-ui,
+    var(--font-suite), "SUITE", -apple-system, BlinkMacSystemFont, system-ui,
     "Apple SD Gothic Neo", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
 
   --ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -312,3 +312,11 @@ body {
   border-radius: 3px;
   padding: 0 0.1em;
 }
+
+/* 연동 블록 (채용 사이트에서 가져온 내용) */
+.live-page .live-section + .live-section { margin-top: 1.6em; padding-top: 1.2em; border-top: 1px dashed var(--hairline-strong, rgba(0, 0, 0, 0.12)); }
+.live-page .live-section > :first-child { margin-top: 0; }
+.live-page h3 { margin-top: 1.2em; }
+.live-block table th { white-space: nowrap; }
+.prose-wiki .live-list { list-style: none; margin: 0; padding: 0; }
+.prose-wiki .live-list li { margin: 0; }

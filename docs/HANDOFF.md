@@ -1,4 +1,4 @@
-# 인라이플 위키 — 작업 인수인계 (2026-09-06 저녁 기준)
+# 인라이플 위키 — 작업 인수인계 (2026-09-06 밤 기준)
 
 새 세션에서 이 저장소를 이어서 작업할 때 먼저 읽는 문서입니다. 명세는 `docs/enliple-wiki-spec.md`, 배포 절차는 `docs/DEPLOY.md`.
 
@@ -7,7 +7,7 @@
 - 배포: https://enliple-wiki.vercel.app (Vercel, 브랜치 `claude/file-reading-collaboration-9unii6` = 기본 브랜치, 푸시하면 자동 배포)
 - DB/인증/파일: Supabase 프로젝트 `mxinyppssadpmuyowwdc`. 로그인은 회사 이메일 **코드(OTP)** 방식만 사용 (매직링크 폐기).
 - 관리자: mcshin@enliple.com (인사관리실). 편집 화면 `/admin`.
-- 스택: Next.js 15 App Router · React 19 · Tailwind v4 · Supabase(Postgres+Auth+Storage) · Noto Sans KR(번들) · react-markdown + remark-gfm + rehype-slug + 자체 콜아웃 플러그인(`src/lib/remark-callouts.ts`).
+- 스택: Next.js 15 App Router · React 19 · Tailwind v4 · Supabase(Postgres+Auth+Storage) · **SUITE 글꼴**(`src/app/fonts/*.woff2`, next/font/local, OFL) · react-markdown + remark-gfm + rehype-slug + 자체 콜아웃 플러그인(`src/lib/remark-callouts.ts`).
 
 ## 지금까지 만든 것
 
@@ -20,6 +20,8 @@
 | 관리자 편집기 | 툴바(제목·굵게·목록·표·콜아웃·구분선·**문서 링크 선택기**·**조문 링크 선택기**·외부 링크), 좌우 실시간 미리보기, 아이콘 선택 | `src/components/editor/MarkdownEditor.tsx`, `IconField.tsx` |
 | 첨부 | 비공개 Storage 버킷 `attachments` + `document_attachments` 테이블, `/api/files/[id]` 2분 서명 URL, 편집 화면 업로드 패널, `/admin/files` 일괄 등록(`slug__파일명.ext`) | `…007_attachments.sql`, `src/components/admin/*`, `src/lib/files.ts` |
 | 브랜드 | CI 그린 `#7FBF31`, CI 블랙 `#040000`. 로고 SVG 컴포넌트, 파비콘, `public/enliple-logo.svg` | `src/components/Logo.tsx`, `src/app/icon.svg`, `globals.css` 토큰 |
+| **연동 블록** | 본문에 `[[live:ninehire-letter]]` · `[[live:ninehire-news]]` · `[[live:ninehire-positions]]` · `[[live:ninehire-page:culture|mobon|mobi|mobsoft|mobwith|anick|process|home]]` 한 줄을 쓰면 문서 화면에서 채용 사이트(enliple.ninehire.site) 최신 내용이 그 자리에 들어감. 서버 fetch + Next 데이터 캐시 **1시간**(`NINEHIRE_REVALIDATE`). 실패 시 원문 링크가 있는 경고 콜아웃만 표시. 편집기 툴바 "🔄 연동 블록" 버튼, 미리보기는 칩으로 표시 | `src/lib/live-blocks.ts`(토큰 파서), `src/lib/ninehire.ts`(HTML의 `__NEXT_DATA__` 파싱 + 공개 API), `src/components/doc/LiveBlock.tsx`, `DocBody.tsx` |
+| 미공개 문서 링크 | 본문이 링크한 문서가 현재 사용자에게 보이지 않으면(초안 등) 링크 대신 회색 글자 + "준비 중" 칩. 문서 페이지가 링크된 slug 를 RLS 하에서 조회해 없는 것을 `missingSlugs` 로 넘김 | `src/app/(site)/docs/[slug]/page.tsx`, `src/components/Markdown.tsx` |
 
 ## DB 상태 (사용자가 SQL Editor 에서 실행한 순서)
 
@@ -28,9 +30,16 @@
 3. `welfare_update.sql`, `batch3_update.sql`, `batch4_update.sql` (증분)
 4. `20260905000006_icons.sql` (아이콘 컬럼·기본 이모지·검색 함수 교체)
 5. `20260905000007_attachments.sql` (첨부 테이블·버킷·정책)
-6. **`batch5_update.sql`** (2026-09-06 세션: 회사 소개·연혁 `company-overview`, 계열사 구조 `group-structure` 신규 작성, 사내 리크루팅 `referral` 에 채용 중 포지션 15건·채용 절차 연결, 세 문서 모두 scope `{all}`) — **사용자 실행 필요**
+6. `batch5_update.sql` (회사 소개·연혁, 계열사 구조 초안, referral 포지션 표) — 7번이 덮어쓰므로 건너뛰어도 됨
+7. **`batch6_update.sql`** — 조직문화 분류(`culture`, 🌿) 신설 + `newsletter`(열일레터, 연동) · `how-we-work`(인라이플 컬처, 연동) · `training-contents`(교육 콘텐츠, 자리만) 신규, `company-overview` · `group-structure` · `referral` 를 안내게시판 톤으로 간결화하고 연동 블록 적용, 인덕스 스텁 15건 본문을 한 줄 + 관련 문서로 정리 — **사용자 실행 필요 (코드 배포 후)**
+8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
 
-기대 상태: 6번까지 실행하면 문서 85 / 공개 70 / "내용 수집 필요" **32**. 4·5·6번은 사용자가 실행했는지 확인 필요. 로컬 검증(아래 파이프라인)으로 6번까지 적용 시 링크 451개 / 깨진 링크 0 확인함.
+기대 상태: 7번까지 문서 88 / 공개 73 / "내용 수집 필요" 33, 8번까지 하면 공개 86. 로컬 검증으로 8번까지 적용 시 링크 439개 / 깨진 링크 0 확인함. **7번은 연동 블록을 렌더하는 코드가 배포된 뒤 실행**해야 한다(먼저 실행하면 `[[live:…]]` 글자가 그대로 보임).
+
+### "보이지 않는데 링크는 되는 문서" 정리 (사용자 질문 2026-09-06)
+- 신규입사자 To Do List, 사내 네트워크 설치 등 **온보딩 13건은 `draft`(작성 중)** 상태다. 임직원 RLS 는 published 만 보여주므로 일반 화면에서는 404 처럼 보이고, 관리자에게만 보인다.
+- 반면 그 문서들을 링크한 계정 발급·식권 안내 등은 **published 인덱스 스텁**이어서 링크만 먼저 노출됐다.
+- 조치: (1) 코드 — 보이지 않는 문서로 가는 링크는 이제 "준비 중" 칩으로 바뀐다. (2) 데이터 — 내용은 이미 작성돼 있으니 `/admin` 에서 확인 후 `publish_onboarding.sql` 로 한 번에 공개하면 링크가 살아난다. (3) 스텁 문서의 긴 안내문("인덕스로 먼저 등록…", "(확인 중)")은 batch6 에서 한 줄로 줄였다.
 
 ## 대외비 파일 (저장소가 Public 이라 커밋하지 않음)
 
@@ -46,7 +55,7 @@
 - Supabase `service_role`/secret 키를 쓰지 않는다. 클라이언트는 anon 키 + RLS 만.
 - 직원 개인정보(취업규칙 개정 동의서 xlsx 의 이름·사번·부서 등)는 위키에 넣지 않는다.
 - 모델 식별자를 커밋 메시지·코드·PR 에 넣지 않는다.
-- SUIT 폰트의 GitHub CDN(sunn-us/SUIT)은 손상된 저장소라 쓰지 않는다. 폰트는 `@fontsource-variable/noto-sans-kr` 번들.
+- 글꼴은 사용자가 준 **SUITE**(OFL) woff2 를 저장소에 번들한다(`src/app/fonts/`, 400·500·600·700·900). 외부 폰트 CDN 은 쓰지 않는다(SUIT GitHub CDN 은 손상된 저장소). Noto Sans KR 패키지는 제거했다.
 - 빌드 후 `BUILD_EXIT` 를 확인한 뒤에만 커밋·푸시한다(과거에 grep 이 종료코드를 가려 깨진 빌드가 올라간 적 있음).
 - 사용자에게 다음에 할 일을 항상 즉시 알려준다. SQL 은 파일로 준다.
 
@@ -56,7 +65,8 @@
 - `/admin` 에서 온보딩 초안 13건 공개, 임원보수·임원퇴직금 규정 초안 2건 공개 여부 결정.
 - "내용 수집 필요" 34건 자료 수집 후 문서화.
 - 계열사 이메일 도메인(모비소프트·모비위드·에이닉) `allowed_email_domains` 등록. 한글 명칭은 채용 사이트·보도 기준 **에이닉(ANICK)** 으로 확정, 위키 문서도 에이닉으로 통일했다(계열사 코드 `anic` 유지).
-- `batch5_update.sql` 을 SQL Editor 에서 실행 → `/docs/company-overview`, `/docs/group-structure`, `/docs/referral` 확인. 회사 소개의 연혁은 공식 홈페이지 연혁 페이지(enliple.com/company/history)를 이 환경에서 열 수 없어 **언론 보도 기준**으로 썼다. 인사관리실이 공식 연혁과 대조 필요.
+- 코드 배포(Vercel 자동) 확인 후 `batch6_update.sql` 실행 → `/docs/newsletter`, `/docs/how-we-work`, `/docs/group-structure`, `/docs/referral` 에서 연동 블록 표시 확인. 회사 소개의 연혁은 공식 홈페이지 연혁 페이지(enliple.com/company/history)를 이 환경에서 열 수 없어 **언론 보도 기준**으로 썼다(문서에는 그 사실을 적지 않음). 인사관리실이 공식 연혁과 대조 필요.
+- 교육 콘텐츠(`training-contents`)에 넣을 영상·자료 목록을 정해 채우기.
 - 에이닉 취업규칙 원문 확보(위키에 없음). 계열사 현재 대표자, 2024년 보도의 '티앱스토어' 자회사 여부, 아이센드 법인 여부 확인.
 - 첨부 일괄 등록: `인라이플위키_첨부파일_일괄등록.zip`(34개, 24개 문서)을 `/admin/files` 에서 올리기.
 - 규정 원문 PDF 화: 지금은 원본 DOCX 가 첨부됨. 인사관리실이 워드→PDF 저장 후 편집 화면에서 교체 권장.
@@ -89,8 +99,9 @@
 
 ## 다음 작업 후보
 
-1. ~~채용 사이트 읽기 → 회사 소개·연혁, 계열사 구조, referral 연결, 복지 문구 대조~~ **완료(2026-09-06, batch5)**. 후속: 채용 포지션 표는 스냅샷이므로 주기적으로 갱신해야 한다. 나인하이어 공개 API `https://api.ninehire.com/identity-access/homepage/recruitments?companyId=132fe4a0-5969-11f1-883b-7f3517c8d898` (인증 불필요, JSON) 로 목록을 받아 `referral` 표를 다시 만들 수 있다(`sources/recruitments.json` 이 2026-09-06 스냅샷). 장기적으로는 위키 서버에서 이 API 를 읽어 포지션 목록을 자동 표시하는 컴포넌트도 검토.
-2. 회사 안내 나머지 3건(`org-chart`, `ci`, `emergency-contacts`)은 내부 자료가 필요해 "내용 수집 필요" 상태. CI 문서는 이미 확정된 CI 그린 `#7FBF31`·블랙 `#040000`·로고 SVG(`public/enliple-logo.svg`)로 초안을 만들 수 있다.
+1. ~~채용 사이트 연동~~ **완료(2026-09-06)**: 열일레터·뉴스·채용 포지션·회사 페이지가 `[[live:…]]` 블록으로 자동 반영된다(1시간 캐시). 남은 것: 연동 블록 안의 이미지는 `image.ninehire.com` 을 `<img>` 로 직접 부르므로 사내망에서 막히면 깨진 아이콘이 보일 수 있음(그럴 땐 `LiveBlock.tsx` Letters 의 썸네일을 이모지로 대체). 나인하이어가 페이지 구조(`__NEXT_DATA__`)를 바꾸면 `src/lib/ninehire.ts` 의 `convertBlock` 만 손보면 된다.
+1-1. **문서 톤 정리(사용자 지시)**: 위키는 사내 안내게시판이다. 정리된 최신 내용만 넣고, "위키 적용 규정", "표기 통일", "출처", "확인 필요" 같은 운영 메타 정보는 문서에 넣지 않는다(HANDOFF 에만). batch6 의 세 문서가 기준 예시. 기존 안내 39건도 같은 기준으로 다듬는 작업이 남아 있다(특히 "확인 중"·"인사관리실이 확인해 반영할 예정" 문장 제거, "근거 규정"은 한 줄 유지).
+2. 회사 안내 나머지 3건(`org-chart`, `ci`, `emergency-contacts`)과 조직문화의 `training-contents`는 내부 자료가 필요해 "내용 수집 필요" 상태. CI 문서는 이미 확정된 CI 그린 `#7FBF31`·블랙 `#040000`·로고 SVG(`public/enliple-logo.svg`)로 초안을 만들 수 있다.
 3. 노션형 2단계: 블록 편집기(Tiptap, 저장은 마크다운 유지) — 툴바를 써본 뒤 판단.
 4. 규정 조문 접기(토글)는 페이지 내 검색·앵커 이동 문제로 보류.
 

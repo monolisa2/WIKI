@@ -1,4 +1,4 @@
-import { EMBEDS, liveLabel, pageShortLabel, tabPages, type EmbedKey, type LiveKind } from "@/lib/live-blocks";
+import { EMBEDS, liveLabel, pageShortLabel, parsePageArg, tabPages, type EmbedKey, type LiveKind } from "@/lib/live-blocks";
 import { LiveTabs } from "@/components/doc/LiveTabs";
 import { getNinehireLetters, getNinehireNews, getNinehirePage, getNinehirePositions, ninehirePageUrl, NINEHIRE_SITE, type NhBlock, type NhPara } from "@/lib/ninehire";
 
@@ -23,17 +23,11 @@ export async function LiveBlock({ kind, arg }: { kind: LiveKind; arg: string | n
   }
 }
 
-function Frame({ source, label, children }: { source: string; label: string; children: React.ReactNode }) {
+function Frame({ label, children }: { source?: string; label: string; children: React.ReactNode }) {
+  // 출처·갱신 안내 문구는 붙이지 않는다 (구성원에게는 내용만 보이면 된다)
   return (
     <section className="live-block my-6" data-live={label}>
       {children}
-      <p className="mt-3 flex flex-wrap items-center gap-x-2 text-[12px] text-ink-3">
-        <span aria-hidden>🔄</span>
-        <span>채용 사이트에서 자동으로 가져옵니다 (1시간마다 갱신).</span>
-        <a href={source} target="_blank" rel="noreferrer" className="text-ink-2 underline underline-offset-2 hover:text-ink">
-          원문 보기 ↗
-        </a>
-      </p>
     </section>
   );
 }
@@ -172,14 +166,16 @@ async function Tabs({ arg }: { arg: string | null }) {
   return <LiveTabs tabs={tabs} panels={pages.map((p) => <Page key={p} page={p} />)} />;
 }
 
-async function Page({ page }: { page: string }) {
+async function Page({ page: arg }: { page: string }) {
+  const { page, range } = parsePageArg(arg || null);
   const source = ninehirePageUrl(page || "home");
   const data = page ? await getNinehirePage(page) : null;
-  if (!data) return <Unavailable source={source} label={liveLabel("ninehire-page", page || null)} />;
+  if (!data) return <Unavailable source={source} label={liveLabel("ninehire-page", arg || null)} />;
+  const sections = range ? data.sections.slice(range[0], range[1] + 1) : data.sections;
   return (
     <Frame source={source} label={data.title}>
       <div className="nh-page">
-        {data.sections.map((sec, i) => (
+        {sections.map((sec, i) => (
           <section key={i} className="nh-section">
             {sec.layouts.map((lay, j) => (
               <div key={j} className={`nh-row nh-cols-${Math.min(lay.columns.length, 4)}`}>
@@ -224,7 +220,9 @@ function Block({ block }: { block: NhBlock }) {
       );
     case "image": {
       // eslint-disable-next-line @next/next/no-img-element
-      const img = <img src={block.src} alt="" loading="lazy" className="nh-img" style={{ width: `${block.size}%` }} />;
+      // 원문에서 15% 같은 작은 비율로 넣은 아이콘은 그대로 두면 콩알만 해진다 → 원본 크기(96px) 가깝게
+      const icon = block.size <= 30;
+      const img = <img src={block.src} alt="" loading="lazy" className={icon ? "nh-img nh-img-icon" : "nh-img"} style={icon ? undefined : { width: `${block.size}%` }} />;
       return (
         <div className={`nh-figure nh-align-${block.align}`}>
           {block.href ? (

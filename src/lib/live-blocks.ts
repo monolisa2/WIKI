@@ -7,6 +7,7 @@
  *   [[live:ninehire-news]]          뉴스 목록 (Insights > News)
  *   [[live:ninehire-positions]]     채용 중인 포지션 표 (Career)
  *   [[live:ninehire-page:culture]]  페이지 본문 (culture · mobon · mobi · mobsoft · mobwith · anick · process · home)
+ *   [[live:ninehire-page:culture@0-1]]  그 페이지의 0~1번 섹션만 (채용용 복지 홍보 등 위키에 맞지 않는 부분을 뺄 때)
  *   [[live:ninehire-tabs:mobon,mobi,mobwith,mobsoft,anick]]  여러 페이지를 탭으로
  *   [[live:embed:approval-kiosk]]   위키가 직접 서빙하는 사내 도구 페이지(public/tools/*)를 끼워 넣기
  */
@@ -42,7 +43,7 @@ export type NinehirePage = keyof typeof NINEHIRE_PAGES;
 export type LiveToken = { kind: LiveKind; arg: string | null; raw: string };
 export type BodySegment = { type: "md"; text: string } | ({ type: "live" } & LiveToken);
 
-const LINE = /^\s*\[\[live:([a-z-]+)(?::([a-z0-9,-]+))?\]\]\s*$/;
+const LINE = /^\s*\[\[live:([a-z-]+)(?::([a-z0-9,@-]+))?\]\]\s*$/;
 
 export function parseLiveLine(line: string): LiveToken | null {
   const m = LINE.exec(line);
@@ -93,11 +94,19 @@ export function pageShortLabel(page: NinehirePage) {
   return (m ? m[1] : full).replace(/\s*\(.*\)$/, "");
 }
 
+/** `culture@0-1` → { page: "culture", range: [0, 1] }. 범위가 없으면 전체 */
+export function parsePageArg(arg: string | null): { page: string; range: [number, number] | null } {
+  const [page = "", rangeText] = (arg ?? "").split("@");
+  const m = rangeText ? /^(\d+)(?:-(\d+))?$/.exec(rangeText) : null;
+  return { page, range: m ? [Number(m[1]), Number(m[2] ?? m[1])] : null };
+}
+
 export function liveLabel(kind: LiveKind, arg: string | null) {
   if (kind === "embed") return `사내 도구 · ${arg && arg in EMBEDS ? EMBEDS[arg as EmbedKey].title : arg ?? "(도구 미지정)"}`;
   if (kind === "ninehire-tabs") return `채용 사이트 페이지 탭 · ${tabPages(arg).map(pageShortLabel).join(" · ")}`;
   if (kind === "ninehire-page") {
-    const name = arg && arg in NINEHIRE_PAGES ? NINEHIRE_PAGES[arg as NinehirePage] : arg ?? "(페이지 미지정)";
+    const { page } = parsePageArg(arg);
+    const name = page && page in NINEHIRE_PAGES ? NINEHIRE_PAGES[page as NinehirePage] : page || "(페이지 미지정)";
     return `채용 사이트 페이지 · ${name}`;
   }
   return LIVE_KINDS[kind].label;

@@ -102,6 +102,13 @@ type RawPage = { title?: string; pageUrl?: string; sections?: { layouts?: { colu
 function linkUrl(l: RawLink) {
   return l && l.linkType === "url" && l.url ? l.url : null;
 }
+/** 채용 사이트 안으로 가는 링크(지원하기·채용공고 등). 위키에는 채용 유도 요소를 넣지 않으므로 이런 블록은 버린다. */
+function isRecruitLink(l: RawLink) {
+  if (!l) return false;
+  if (l.linkType && l.linkType !== "url") return true; // page/section 링크 = 채용 사이트 내부 이동
+  const u = (l.url ?? "").toLowerCase();
+  return u.includes("ninehire") || u.includes("mobwith-recruit");
+}
 function imageUrl(key: string | null | undefined) {
   return key ? `https://image.ninehire.com/${key}` : null;
 }
@@ -143,7 +150,7 @@ function convertBlock(b: RawBlock): NhBlock | null {
     }
     case "image": {
       const src = imageUrl(b.imageFileKey);
-      if (!src) return null;
+      if (!src || isRecruitLink(b.link)) return null;
       const layout = (b.layout ?? "center") as NhAlign;
       return {
         kind: "image",
@@ -154,6 +161,7 @@ function convertBlock(b: RawBlock): NhBlock | null {
       };
     }
     case "button": {
+      if (isRecruitLink(b.link)) return null;
       const href = linkUrl(b.link);
       return href ? { kind: "link", text: htmlToText(b.text ?? "") || "자세히 보기", href } : null;
     }

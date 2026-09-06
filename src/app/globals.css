@@ -349,7 +349,7 @@ body {
 .nh-figure.nh-align-right { justify-content: flex-end; }
 .nh-img { display: block; height: auto; max-width: 100%; border-radius: 12px; }
 /* 열 안의 작은 아이콘(복지 카드 등)은 축소 비율 그대로 두면 너무 작아지므로 최소 크기 확보 */
-.nh-cols-3 .nh-img, .nh-cols-4 .nh-img { min-width: 56px; }
+.nh-img-icon { width: 104px; max-width: 45%; }
 .live-tabs [role="tabpanel"][hidden] { display: none; }
 
 /* 홈 분류 그리드: 다단 배치 (분류 하나가 열 중간에서 끊기지 않게) */

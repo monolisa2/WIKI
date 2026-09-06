@@ -38,6 +38,7 @@
 8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
 9. `batch7_update.sql` — 계열사 구조의 회사별 소개를 `[[live:ninehire-tabs:…]]` 탭 하나로
 12. **`supabase/migrations/20260907000008_search_rank.sql`** — 검색 순위: 규정 전문보다 안내·양식 +0.5, 필독 +0.3 (SQL Editor 에서 실행)
+14. **`batch11_update.sql`** — 열일레터 '자동 추가' 문장 제거, 인라이플 컬처를 `culture@0-1`(배너·일하는 방식만)로. 코드: 연동 블록의 출처·갱신 안내 문구 제거, 채용 사이트 내부로 가는 이미지·버튼(지원하기·채용공고) 자동 제외(`isRecruitLink`), `page@a-b` 섹션 범위 문법, 작은 아이콘 104px
 13. **`batch10_update.sql`** — 주제별 안내 26건의 doc_type 을 rule → guide 로(규정 배지는 규정 전문 14건에만), 규정 전문 아이콘 📘 통일
 11. **`batch9_update.sql`** — 네이버웍스 공지 반영: `condolence-flowers`(경조화환 발송 기준, 총무팀 2026-07-01), `childcare-tax-exemption`(보육수당 비과세, 인사관리실 2026-07-02), `amaranth-guide`(아마란스10 가이드 ver.1 요약, 스텁 채움), `approval-authority`(위임전결 기준·결재라인, 회계팀 2026-07-01, 조회 도구 임베드), `family-events` 화환 행에 신청 경로·링크 추가. 첨부 5개는 `wiki_attachments_batch9.zip` 을 `/admin/files` 에서 일괄 등록
 10. **`batch8_update.sql`** — 문서 55건 끝의 반복 면책 인용문 제거(푸터에 같은 문구), "확인 중"·"반영할 예정" 운영 메모 12곳을 확정 문장으로. 기념일 축하금 지급 대상은 **공지 기준(입사 1년 이상 정규직)** 으로 적었으니 인사관리실이 규정(3개월)과 어느 쪽이 맞는지 최종 확인

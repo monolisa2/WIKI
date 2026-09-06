@@ -67,7 +67,7 @@
 한 것: `Markdown` 을 서버 컴포넌트로(react-markdown 이 문서 페이지 JS 에서 빠져 **157KB → 107KB**), 연동 블록 Suspense 스트리밍, `loading.tsx` 골격 화면(홈·문서), `React.cache()` 로 문서 조회(generateMetadata+page)와 나인하이어 HTML 파싱 중복 제거, 레이아웃의 `getUser()`(인증 서버 왕복)를 `getSession()` 으로(미들웨어가 이미 검증), `experimental.staleTimes.dynamic=30`(뒤로가기 즉시), 글꼴 900 굵기 제거(preload 143KB 절약).
 
 남은 과제:
-- **지역**: Vercel 함수는 `iad1`(미국 동부)이고 Supabase 도 이 환경에서 측정한 지연으로 보아 미국 동부로 추정된다(같은 지역이라 함수↔DB 는 빠름). 구성원은 한국이라 요청마다 태평양 왕복(~180ms)이 붙는다. Supabase 프로젝트 지역은 대시보드 Settings > General 에서 확인. 둘 다 서울로 옮기면 체감이 가장 크지만, Supabase 는 지역 변경이 불가해 **새 프로젝트 생성 + 데이터 이전**이 필요하다(별도 작업). Vercel 만 서울(`vercel.json` regions `icn1`)로 옮기면 DB 왕복이 늘어 오히려 느려질 수 있으니 **DB 지역을 확인한 뒤** 결정.
+- **지역**: Supabase 프로젝트는 **서울(ap-northeast-2)** 이다(2026-09-07 사용자 대시보드 스크린샷으로 확인). Vercel 함수는 기본 `iad1`(미국 동부)이어서 DB 왕복마다 태평양을 건너던 것을 `vercel.json` 의 `regions: ["icn1"]` 로 서울에 고정했다(Hobby 플랜도 지역 1개 지정 가능). 이전 세션에서 "Supabase 도 미국 동부로 추정"이라고 적은 것은 컨테이너 프록시 지연을 잘못 읽은 것이니 무시.
 - 미들웨어 `getUser()` 는 요청마다 인증 서버 왕복 1회. Supabase 의 비대칭 JWT 키(getClaims 로컬 검증)로 바꾸면 없앨 수 있다.
 - 홈은 문서 86건 전체를 매 요청 조회. 문서가 수백 건이 되면 `unstable_cache` + 관리자 발행 시 `revalidateTag` 로 바꾼다.
 

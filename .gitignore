@@ -28,3 +28,4 @@ supabase/seed/regulations.sql
 supabase/seed/welfare_update.sql
 supabase/seed/batch3_update.sql
 supabase/seed/batch4_update.sql
+supabase/seed/batch5_update.sql

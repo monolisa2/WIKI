@@ -1,4 +1,4 @@
-# 인라이플 위키 — 작업 인수인계 (2026-09-06 기준)
+# 인라이플 위키 — 작업 인수인계 (2026-09-06 저녁 기준)
 
 새 세션에서 이 저장소를 이어서 작업할 때 먼저 읽는 문서입니다. 명세는 `docs/enliple-wiki-spec.md`, 배포 절차는 `docs/DEPLOY.md`.
 
@@ -28,15 +28,18 @@
 3. `welfare_update.sql`, `batch3_update.sql`, `batch4_update.sql` (증분)
 4. `20260905000006_icons.sql` (아이콘 컬럼·기본 이모지·검색 함수 교체)
 5. `20260905000007_attachments.sql` (첨부 테이블·버킷·정책)
+6. **`batch5_update.sql`** (2026-09-06 세션: 회사 소개·연혁 `company-overview`, 계열사 구조 `group-structure` 신규 작성, 사내 리크루팅 `referral` 에 채용 중 포지션 15건·채용 절차 연결, 세 문서 모두 scope `{all}`) — **사용자 실행 필요**
 
-기대 상태: 문서 85 / 공개 70 / "내용 수집 필요" 34. 4·5번은 사용자가 실행했는지 확인 필요.
+기대 상태: 6번까지 실행하면 문서 85 / 공개 70 / "내용 수집 필요" **32**. 4·5·6번은 사용자가 실행했는지 확인 필요. 로컬 검증(아래 파이프라인)으로 6번까지 적용 시 링크 451개 / 깨진 링크 0 확인함.
 
 ## 대외비 파일 (저장소가 Public 이라 커밋하지 않음)
 
-규정 전문이 들어간 seed SQL 은 `.gitignore` 로 제외되어 있다: `supabase/seed/regulations.sql`, `welfare_update.sql`, `batch3_update.sql`, `batch4_update.sql`.
-저장소를 **Private 으로 전환한 뒤** `git add -f` 로 추가한다. 생성기(`gen_seed.py`)와 규정 마크다운(`md/`)은 세션 스크래치패드에 있었고, 사용자에게 `wiki-tooling.zip` 으로 전달했다. 새 세션에서는 그 zip 을 업로드받아 `scratchpad/rules/` 에 풀면 같은 파이프라인을 쓸 수 있다.
+규정 전문이 들어간 seed SQL 은 `.gitignore` 로 제외되어 있다: `supabase/seed/regulations.sql`, `welfare_update.sql`, `batch3_update.sql`, `batch4_update.sql`, `batch5_update.sql`(내부 포상금 표 포함이라 같은 취급).
+저장소를 **Private 으로 전환한 뒤** `git add -f` 로 추가한다. 생성기(`gen_seed.py`)와 규정 마크다운(`md/`)은 세션 스크래치패드에 있었고, 사용자에게 `wiki-tooling.zip` 으로 전달했다. 새 세션에서는 그 zip 을 업로드받아 `scratchpad/rules/` 에 풀면 같은 파이프라인을 쓸 수 있다. 2026-09-06 세션에서 갱신본 **`wiki-tooling-v2.zip`** 을 전달했다(회사 안내 문서 정의 `company_guides.py`, 채용 사이트 스냅샷 `sources/`, 수정된 `validate.sh`·`linkcheck.py`, `batch5_update.sql` 포함). 다음 세션은 v2 를 쓴다.
 
-파이프라인: 업로드 파일 → 텍스트 추출(`docx2md.py`, `hwp2txt.py`, pypdf layout, pymupdf) → `gen_seed.py` 에 REGS/GUIDES 추가 → `python3 gen_seed.py all regulations.sql` 과 `python3 gen_seed.py "slug1,slug2" batchN_update.sql` → 로컬 Postgres 로 검증(`validate.sh`, `auth_stub.sql`, `linkcheck.py`) → 증분 SQL **파일**로 전달(사용자 선호: 파일, 인라인 텍스트 아님).
+파이프라인: 업로드 파일 → 텍스트 추출(`docx2md.py`, `hwp2txt.py`, pypdf layout, pymupdf) → `gen_seed.py` 에 REGS/GUIDES 추가(회사 안내 분류는 `company_guides.py`) → `python3 gen_seed.py all regulations.sql` 과 `CHANGE_NOTE="개정 이력 메모" python3 gen_seed.py "slug1,slug2" batchN_update.sql` → 로컬 Postgres 로 검증(`validate.sh`, `auth_stub.sql`, `linkcheck.py`) → 증분 SQL **파일**로 전달(사용자 선호: 파일, 인라인 텍스트 아님).
+
+로컬 Postgres 요령(이 원격 환경): `pg_ctlcluster 16 main start` → `sudo -u postgres psql -c "alter user postgres password 'postgres'"` → `validate.sh` 는 `PGPASSWORD=postgres` 로 접속하고, `all_in_one.sql` 에 006_icons 가 이미 포함되어 있어 `regulations.sql` 적용 전에 `search_documents(text,int)` 를 drop 한 뒤 007_attachments 까지 적용한다(사용자 DB 실제 이력과 같은 최종 상태).
 
 ## 절대 지킬 것
 
@@ -52,7 +55,9 @@
 - GitHub 저장소 monolisa2/WIKI Private 전환 → 대외비 seed 4개 `git add -f` 커밋.
 - `/admin` 에서 온보딩 초안 13건 공개, 임원보수·임원퇴직금 규정 초안 2건 공개 여부 결정.
 - "내용 수집 필요" 34건 자료 수집 후 문서화.
-- 계열사 이메일 도메인(모비소프트·모비위드·애닉) `allowed_email_domains` 등록. 애닉 공식 한글 명칭 확인.
+- 계열사 이메일 도메인(모비소프트·모비위드·에이닉) `allowed_email_domains` 등록. 한글 명칭은 채용 사이트·보도 기준 **에이닉(ANICK)** 으로 확정, 위키 문서도 에이닉으로 통일했다(계열사 코드 `anic` 유지).
+- `batch5_update.sql` 을 SQL Editor 에서 실행 → `/docs/company-overview`, `/docs/group-structure`, `/docs/referral` 확인. 회사 소개의 연혁은 공식 홈페이지 연혁 페이지(enliple.com/company/history)를 이 환경에서 열 수 없어 **언론 보도 기준**으로 썼다. 인사관리실이 공식 연혁과 대조 필요.
+- 에이닉 취업규칙 원문 확보(위키에 없음). 계열사 현재 대표자, 2024년 보도의 '티앱스토어' 자회사 여부, 아이센드 법인 여부 확인.
 - 첨부 일괄 등록: `인라이플위키_첨부파일_일괄등록.zip`(34개, 24개 문서)을 `/admin/files` 에서 올리기.
 - 규정 원문 PDF 화: 지금은 원본 DOCX 가 첨부됨. 인사관리실이 워드→PDF 저장 후 편집 화면에서 교체 권장.
 - Supabase 이메일 템플릿을 코드만 보이게(Magic Link/OTP·Confirm sign up), OTP 길이 6자리, SMTP 는 네이버웍스 완료.
@@ -68,11 +73,26 @@
 - 배우자의 형제자매·조부모 사망: 취업규칙엔 경조휴가 있으나 경조사규정 표에 경조금 행 없음.
 - 승진 축하금 지급 시기·방법 미확인. 건강보험 피부양자 담당자(공지: 박민희 주임) 최신 여부.
 
+### 채용 사이트(enliple.ninehire.site) 복지 문구와 위키(규정) 대조 결과 (2026-09-06)
+
+| 항목 | 채용 사이트·공고 | 위키(규정·공지) | 판단 |
+|---|---|---|---|
+| 복지포인트 상한 | Culture 페이지 "연 최소 100만원~최대 600만원", 채용 공고·모비위드 페이지 "최대 700만원" | 대표 1,000만원, 부대표·C레벨 700만원, 팀원 100/150만원 | 사이트 두 곳 표기가 서로 다름. Culture 페이지 600만원은 구 기준으로 보임 → 인사관리실이 채용 사이트 문구 정리 |
+| 자격증 응시료 | "응시료 **전액** 지원" | 복리후생규정 제15조: 1회 최대 15만원, 합격자 연 2회 | 상한이 사이트에 없음 → 문구 정리 또는 규정 확인 |
+| 사내 리크루팅 지급 시점 | "최종 합격 시 최대 300만원" | 3개월·6개월 근속 시 절반씩 | referral 문서에 차이를 명시함 |
+| 야근 택시비 | 23시 이후 퇴근 | 복리후생규정 제10조 23시 | 일치 |
+| 식대 | 점심·저녁 각 1만원, 석식은 야근 시 | 제9조 석식 21시 이후 근무 | 일치(사이트는 기준 시각 생략) |
+| 장기근속 | 최대 30일·1,000만원 | 20년 30일·1,000만원 | 일치 |
+| 승진 축하금 | 최소 50만원~최대 300만원 | 주임 50~임원 300만원 | 일치 |
+| 생일·결혼기념일 축하금, 생일휴가, 가족 생일 조기퇴근, 창립기념일 6/20 | 15만원/10만원, 1일 유급, 연 2회 3시간 | 동일 | 일치 |
+| 채용 공고 소속 | "[모비소프트] 퍼포먼스 마케터(팀장급)" 공고의 소속 필터가 **인라이플**로 등록됨 | - | 나인하이어 공고 설정 오류로 보임 → 채용 담당자(박도영 대리) 확인 |
+
 ## 다음 작업 후보
 
-1. 채용 사이트 https://enliple.ninehire.site/ 읽기(새 세션은 네트워크 "전체" 환경) → 회사 소개·연혁(`company-overview`), 계열사 구조(`group-structure`) 채우기, 채용 포지션을 `referral` 문서에 연결, 복지 문구 대조.
-2. 노션형 2단계: 블록 편집기(Tiptap, 저장은 마크다운 유지) — 툴바를 써본 뒤 판단.
-3. 규정 조문 접기(토글)는 페이지 내 검색·앵커 이동 문제로 보류.
+1. ~~채용 사이트 읽기 → 회사 소개·연혁, 계열사 구조, referral 연결, 복지 문구 대조~~ **완료(2026-09-06, batch5)**. 후속: 채용 포지션 표는 스냅샷이므로 주기적으로 갱신해야 한다. 나인하이어 공개 API `https://api.ninehire.com/identity-access/homepage/recruitments?companyId=132fe4a0-5969-11f1-883b-7f3517c8d898` (인증 불필요, JSON) 로 목록을 받아 `referral` 표를 다시 만들 수 있다(`sources/recruitments.json` 이 2026-09-06 스냅샷). 장기적으로는 위키 서버에서 이 API 를 읽어 포지션 목록을 자동 표시하는 컴포넌트도 검토.
+2. 회사 안내 나머지 3건(`org-chart`, `ci`, `emergency-contacts`)은 내부 자료가 필요해 "내용 수집 필요" 상태. CI 문서는 이미 확정된 CI 그린 `#7FBF31`·블랙 `#040000`·로고 SVG(`public/enliple-logo.svg`)로 초안을 만들 수 있다.
+3. 노션형 2단계: 블록 편집기(Tiptap, 저장은 마크다운 유지) — 툴바를 써본 뒤 판단.
+4. 규정 조문 접기(토글)는 페이지 내 검색·앵커 이동 문제로 보류.
 
 ## 로컬 미리보기 요령 (Supabase 없이 화면 확인)
 

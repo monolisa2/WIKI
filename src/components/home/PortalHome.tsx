@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SearchTrigger } from "@/components/search/SearchCommand";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
+import { Logo } from "@/components/Logo";
 import { DEFAULT_CATEGORY_ICON, docIcon, type DocType } from "@/lib/constants";
 import type { Category } from "@/lib/types";
 
@@ -36,12 +37,12 @@ export function PortalHome({ categories, docs }: { categories: Category[]; docs:
       <section className="relative overflow-hidden">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(55%_65%_at_50%_0%,rgba(122,193,67,0.20),transparent_70%)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(55%_65%_at_50%_0%,rgba(127,191,49,0.20),transparent_70%)]"
         />
         <div className="wrap relative pb-4 pt-14 sm:pt-20">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-accent">Enliple Wiki</p>
-            <h1 className="mt-3 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[52px]">인라이플 생활 안내</h1>
+            <Logo className="mx-auto h-9 w-auto text-ink sm:h-11" />
+            <h1 className="mt-6 text-[36px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[50px]">인라이플 생활 안내</h1>
             <div id="hero-search" className="mt-8">
               <SearchTrigger variant="hero" />
             </div>

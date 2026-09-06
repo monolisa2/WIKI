@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BrandMark } from "@/components/Brand";
+import { Logo } from "@/components/Logo";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = { title: "로그인" };
@@ -11,8 +11,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="card w-full max-w-sm p-8">
         <div className="text-center mb-6">
-          <BrandMark href="/login" />
-          <h1 className="mt-4 text-xl font-black tracking-tight">인라이플 위키 로그인</h1>
+          <Logo className="mx-auto h-8 w-auto text-ink" />
+          <h1 className="mt-5 text-[19px] font-semibold tracking-tight">인라이플 위키 로그인</h1>
         </div>
         <LoginForm next={next} initialError={error ? "로그인이 필요합니다. 회사 이메일로 코드를 받아 다시 로그인해주세요." : undefined} />
       </div>

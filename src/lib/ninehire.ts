@@ -42,22 +42,49 @@ export function htmlToText(html: string) {
     .filter(Boolean)
     .join("\n");
 }
-function isHeadingHtml(html: string) {
-  // 나인하이어 편집기는 큰 제목을 <h3 style="font-size: 42px"> 또는 굵은 28px 문단으로 넣는다
-  if (/^\s*<h[1-6]/i.test(html)) return true;
-  const size = /font-size:\s*(\d+)px/i.exec(html);
-  const text = htmlToText(html);
-  return Boolean(size && Number(size[1]) >= 24 && /<strong>|<b>/i.test(html) && text.length <= 60 && !text.includes("\n"));
+
+function escapeHtml(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+// 자리표시 문자 (사용자 영역 코드포인트라 본문에 나올 일이 없다)
+const PH_BR = "", PH_B = "", PH_BE = "", PH_I = "", PH_IE = "";
+/**
+ * 문단 안쪽 HTML 을 안전한 최소 마크업(<strong> <em> <br>)만 남긴 HTML 로 바꾼다.
+ * 태그를 먼저 자리표시로 바꾸고, 엔티티를 풀고, 전부 이스케이프한 뒤 자리표시만 태그로 되돌리므로 원문의 다른 태그·속성은 남지 않는다.
+ */
+function safeInlineHtml(inner: string) {
+  const s = inner
+    .replace(/<br\s*\/?>/gi, PH_BR)
+    .replace(/<\/(strong|b)\b[^>]*>/gi, PH_BE)
+    .replace(/<(strong|b)\b[^>]*>/gi, PH_B)
+    .replace(/<\/(em|i)\b[^>]*>/gi, PH_IE)
+    .replace(/<(em|i)\b[^>]*>/gi, PH_I)
+    .replace(/<[^>]+>/g, "");
+  const text = escapeHtml(decodeEntities(s).replace(/[​⁠﻿]/g, "").replace(/ /g, " "));
+  return text
+    .split(PH_BR).join("<br>")
+    .split(PH_B).join("<strong>")
+    .split(PH_BE).join("</strong>")
+    .split(PH_I).join("<em>")
+    .split(PH_IE).join("</em>")
+    .replace(/^(\s|<br>)+|(\s|<br>)+$/g, "")
+    .trim();
 }
 
 /* ── 페이지 구조 ─────────────────────────────────────────────── */
 
+export type NhAlign = "left" | "center" | "right";
+/** 문단 하나: 안전한 인라인 HTML + 원문 글자 크기(px) + 정렬 */
+export type NhPara = { html: string; size: number; align: NhAlign; heading: boolean };
 export type NhBlock =
-  | { kind: "heading"; text: string }
-  | { kind: "text"; text: string }
+  | { kind: "text"; paras: NhPara[] }
+  | { kind: "image"; src: string; size: number; align: NhAlign; href: string | null }
   | { kind: "link"; text: string; href: string }
   | { kind: "cards"; items: { title: string; href: string | null; image: string | null }[] };
-export type NhPage = { title: string; url: string; pageUrl: string; sections: NhBlock[][] };
+/** 나인하이어의 레이아웃(행) 하나 = 열 여러 개, 열마다 블록 목록 */
+export type NhLayout = { columns: NhBlock[][] };
+export type NhSection = { layouts: NhLayout[] };
+export type NhPage = { title: string; url: string; pageUrl: string; sections: NhSection[] };
 
 type RawLink = { linkType?: string; url?: string | null } | null | undefined;
 type RawBlock = {
@@ -65,6 +92,8 @@ type RawBlock = {
   text?: string | null;
   link?: RawLink;
   imageFileKey?: string | null;
+  size?: number | null;
+  layout?: string | null;
   slides?: { title?: string | null; description?: string | null; imageFileKey?: string | null; link?: RawLink }[];
 };
 type RawPage = { title?: string; pageUrl?: string; sections?: { layouts?: { columns?: { blocks?: RawBlock[] }[] }[] }[] };
@@ -75,14 +104,53 @@ function linkUrl(l: RawLink) {
 function imageUrl(key: string | null | undefined) {
   return key ? `https://image.ninehire.com/${key}` : null;
 }
+function alignOf(style: string | undefined, fallback: NhAlign = "left"): NhAlign {
+  const m = /text-align:\s*(left|center|right)/i.exec(style ?? "");
+  return (m?.[1].toLowerCase() as NhAlign | undefined) ?? fallback;
+}
+function sizeOf(html: string, fallback = 16) {
+  const sizes = Array.from(html.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/gi)).map((m) => Number(m[1]));
+  return sizes.length ? Math.max(...sizes) : fallback;
+}
+
+/** 글 블록 HTML → 문단 목록. 문단(p·h)마다 자기 글자 크기·정렬을 가진다. */
+export function parseTextBlock(html: string): NhPara[] {
+  const out: NhPara[] = [];
+  const re = /<(p|h[1-6]|li)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
+  let m: RegExpExecArray | null;
+  let matched = false;
+  while ((m = re.exec(html))) {
+    matched = true;
+    const inner = safeInlineHtml(m[3]);
+    if (!inner.replace(/<br>/g, "").trim()) continue;
+    const size = sizeOf(m[2] + m[3]);
+    out.push({ html: inner, size, align: alignOf(m[2]), heading: /^h/i.test(m[1]) || size >= 24 });
+  }
+  if (!matched) {
+    const inner = safeInlineHtml(html);
+    if (inner) out.push({ html: inner, size: sizeOf(html), align: alignOf(html), heading: sizeOf(html) >= 24 });
+  }
+  return out;
+}
 
 function convertBlock(b: RawBlock): NhBlock | null {
   switch (b.type) {
     case "text": {
       if (!b.text) return null;
-      const text = htmlToText(b.text);
-      if (!text) return null;
-      return isHeadingHtml(b.text) ? { kind: "heading", text } : { kind: "text", text };
+      const paras = parseTextBlock(b.text);
+      return paras.length ? { kind: "text", paras } : null;
+    }
+    case "image": {
+      const src = imageUrl(b.imageFileKey);
+      if (!src) return null;
+      const layout = (b.layout ?? "center") as NhAlign;
+      return {
+        kind: "image",
+        src,
+        size: Math.min(100, Math.max(10, Number(b.size) || 100)),
+        align: ["left", "center", "right"].includes(layout) ? layout : "center",
+        href: linkUrl(b.link),
+      };
     }
     case "button": {
       const href = linkUrl(b.link);
@@ -95,7 +163,7 @@ function convertBlock(b: RawBlock): NhBlock | null {
       return items.length ? { kind: "cards", items } : null;
     }
     default:
-      return null; // blank · divider · image(장식) 은 뺀다
+      return null; // blank · divider 는 뺀다 (간격은 위키 쪽 스타일로)
   }
 }
 
@@ -120,20 +188,29 @@ async function fetchHomepagePages(): Promise<RawPage[]> {
 /** 문서에서 직접 고를 수 있는 페이지 + 목록 블록이 내부적으로 읽는 페이지 */
 const READABLE_PAGES = new Set<string>([...Object.keys(NINEHIRE_PAGES), "letter", "news"]);
 
-/** 채용 사이트 페이지 하나를 글 구조로. 없거나 실패하면 null. */
+/** 채용 사이트 페이지 하나를 구조(섹션 → 행 → 열 → 블록) 그대로. 없거나 실패하면 null. */
 export async function getNinehirePage(page: string): Promise<NhPage | null> {
   if (!READABLE_PAGES.has(page)) return null;
   try {
     const pages = await fetchHomepagePages();
     const raw = pages.find((p) => p.pageUrl === page);
     if (!raw) return null;
-    const sections = (raw.sections ?? [])
-      .map((s) => (s.layouts ?? []).flatMap((l) => (l.columns ?? []).flatMap((c) => (c.blocks ?? []).map(convertBlock))).filter((b): b is NhBlock => b !== null))
-      .filter((blocks) => blocks.length > 0);
+    const sections: NhSection[] = (raw.sections ?? [])
+      .map((s) => ({
+        layouts: (s.layouts ?? [])
+          .map((l) => ({ columns: (l.columns ?? []).map((c) => (c.blocks ?? []).map(convertBlock).filter((b): b is NhBlock => b !== null)) }))
+          .filter((l) => l.columns.some((c) => c.length > 0)),
+      }))
+      .filter((s) => s.layouts.length > 0);
     return { title: raw.title ?? (NINEHIRE_PAGES as Record<string, string>)[page] ?? page, url: ninehirePageUrl(page), pageUrl: page, sections };
   } catch {
     return null;
   }
+}
+
+/** 페이지의 블록을 문서 순서대로 평탄화 (목록형 블록용) */
+function flatBlocks(page: NhPage): NhBlock[] {
+  return page.sections.flatMap((s) => s.layouts.flatMap((l) => l.columns.flat()));
 }
 
 /* ── 열일레터 · 뉴스 ─────────────────────────────────────────── */
@@ -142,7 +219,7 @@ export type NhLetter = { title: string; href: string; image: string | null };
 export async function getNinehireLetters(): Promise<NhLetter[] | null> {
   const page = await getNinehirePage("letter");
   if (!page) return null;
-  const cards = page.sections.flat().find((b): b is Extract<NhBlock, { kind: "cards" }> => b.kind === "cards");
+  const cards = flatBlocks(page).find((b): b is Extract<NhBlock, { kind: "cards" }> => b.kind === "cards");
   return (cards?.items ?? []).filter((i) => i.href).map((i) => ({ title: i.title, href: i.href as string, image: i.image }));
 }
 
@@ -151,22 +228,26 @@ export async function getNinehireNews(): Promise<NhNews[] | null> {
   const page = await getNinehirePage("news");
   if (!page) return null;
   const items: NhNews[] = [];
-  for (const blocks of page.sections) {
-    let cur: NhNews | null = null;
-    for (const b of blocks) {
-      if (b.kind === "heading" || (b.kind === "text" && !cur)) {
+  let cur: NhNews | null = null;
+  for (const b of flatBlocks(page)) {
+    if (b.kind === "text") {
+      // 한 글 블록 안의 제목 문단(큰 글자)들은 줄바꿈된 한 제목으로 합친다
+      const title = b.paras.filter((p) => p.heading).map((p) => htmlToText(p.html).replace(/\n/g, " ")).filter(Boolean).join(" ");
+      const meta = b.paras.filter((p) => !p.heading).map((p) => htmlToText(p.html).replace(/\n/g, " ")).filter(Boolean).join(" ");
+      if (title) {
         if (cur) items.push(cur);
-        cur = { title: b.text.replace(/\n/g, " "), meta: null, href: null };
-      } else if (b.kind === "text" && cur) {
-        cur.meta = b.text.replace(/\n/g, " ");
-      } else if (b.kind === "link" && cur) {
-        cur.href = b.href;
-        items.push(cur);
-        cur = null;
+        cur = { title, meta: meta || null, href: null };
+      } else if (meta) {
+        if (!cur) cur = { title: meta, meta: null, href: null };
+        else cur.meta = cur.meta ? `${cur.meta} ${meta}` : meta;
       }
+    } else if (b.kind === "link" && cur) {
+      cur.href = b.href;
+      items.push(cur);
+      cur = null;
     }
-    if (cur) items.push(cur);
   }
+  if (cur) items.push(cur);
   return items;
 }
 

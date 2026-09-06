@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { DOC_TYPES, docIcon, type DocType } from "@/lib/constants";
 import { CALLOUT_KINDS, type CalloutKind } from "@/lib/remark-callouts";
 import { extractToc } from "@/lib/toc";
-import { LIVE_KINDS, NINEHIRE_PAGES, liveTokenText, type LiveKind, type NinehirePage } from "@/lib/live-blocks";
+import { DEFAULT_TAB_PAGES, LIVE_KINDS, NINEHIRE_PAGES, liveTokenText, type LiveKind, type NinehirePage } from "@/lib/live-blocks";
 
 /* ────────────────────────────────────────────────────────────────
    관리자용 마크다운 편집기
@@ -371,7 +371,7 @@ function LiveBlockDialog({ onClose, onInsert }: { onClose: () => void; onInsert:
             ) : (
               <button
                 type="button"
-                onClick={() => onInsert(liveTokenText(k))}
+                onClick={() => onInsert(liveTokenText(k, k === "ninehire-tabs" ? DEFAULT_TAB_PAGES.join(",") : null))}
                 className="flex w-full items-center gap-3 rounded-[10px] border border-hairline px-3 py-2 text-left hover:bg-accent-soft"
               >
                 <span aria-hidden>🔄</span>

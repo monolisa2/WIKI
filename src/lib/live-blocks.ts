@@ -7,12 +7,14 @@
  *   [[live:ninehire-news]]          뉴스 목록 (Insights > News)
  *   [[live:ninehire-positions]]     채용 중인 포지션 표 (Career)
  *   [[live:ninehire-page:culture]]  페이지 본문 (culture · mobon · mobi · mobsoft · mobwith · anick · process · home)
+ *   [[live:ninehire-tabs:mobon,mobi,mobwith,mobsoft,anick]]  여러 페이지를 탭으로
  */
 export const LIVE_KINDS = {
   "ninehire-letter": { label: "열일레터 목록", hint: "채용 사이트 Insights > Letter 의 월별 열일레터 링크" },
   "ninehire-news": { label: "뉴스 목록", hint: "채용 사이트 Insights > News 의 보도 목록" },
   "ninehire-positions": { label: "채용 중인 포지션", hint: "채용 사이트 Career 의 진행 중 공고 표" },
-  "ninehire-page": { label: "채용 사이트 페이지 본문", hint: "회사 소개·계열사·조직문화 페이지의 글을 그대로 가져옴" },
+  "ninehire-page": { label: "채용 사이트 페이지", hint: "회사 소개·계열사·조직문화 페이지를 이미지·배치 그대로 가져옴" },
+  "ninehire-tabs": { label: "채용 사이트 페이지 (탭)", hint: "여러 페이지를 탭으로 넘겨 보기. 기본: 모비온·모비아이·모비위드·모비소프트·에이닉" },
 } as const;
 export type LiveKind = keyof typeof LIVE_KINDS;
 
@@ -32,7 +34,7 @@ export type NinehirePage = keyof typeof NINEHIRE_PAGES;
 export type LiveToken = { kind: LiveKind; arg: string | null; raw: string };
 export type BodySegment = { type: "md"; text: string } | ({ type: "live" } & LiveToken);
 
-const LINE = /^\s*\[\[live:([a-z-]+)(?::([a-z0-9-]+))?\]\]\s*$/;
+const LINE = /^\s*\[\[live:([a-z-]+)(?::([a-z0-9,-]+))?\]\]\s*$/;
 
 export function parseLiveLine(line: string): LiveToken | null {
   const m = LINE.exec(line);
@@ -70,7 +72,21 @@ export function liveTokenText(kind: LiveKind, arg?: string | null) {
   return arg ? `[[live:${kind}:${arg}]]` : `[[live:${kind}]]`;
 }
 
+export const DEFAULT_TAB_PAGES: NinehirePage[] = ["mobon", "mobi", "mobwith", "mobsoft", "anick"];
+/** `ninehire-tabs` 인자(쉼표 구분)를 페이지 목록으로. 모르는 값은 버리고, 비어 있으면 기본 목록 */
+export function tabPages(arg: string | null): NinehirePage[] {
+  const list = (arg ?? "").split(",").map((s) => s.trim()).filter((s): s is NinehirePage => s in NINEHIRE_PAGES);
+  return list.length ? list : DEFAULT_TAB_PAGES;
+}
+/** 탭 이름: "MOBON 모비온" → "모비온" 처럼 한글만 짧게 */
+export function pageShortLabel(page: NinehirePage) {
+  const full = NINEHIRE_PAGES[page];
+  const m = /^[A-Za-z-]+\s+(.+)$/.exec(full);
+  return (m ? m[1] : full).replace(/\s*\(.*\)$/, "");
+}
+
 export function liveLabel(kind: LiveKind, arg: string | null) {
+  if (kind === "ninehire-tabs") return `채용 사이트 페이지 탭 · ${tabPages(arg).map(pageShortLabel).join(" · ")}`;
   if (kind === "ninehire-page") {
     const name = arg && arg in NINEHIRE_PAGES ? NINEHIRE_PAGES[arg as NinehirePage] : arg ?? "(페이지 미지정)";
     return `채용 사이트 페이지 · ${name}`;

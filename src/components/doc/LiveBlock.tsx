@@ -1,5 +1,6 @@
-import { liveLabel, type LiveKind } from "@/lib/live-blocks";
-import { getNinehireLetters, getNinehireNews, getNinehirePage, getNinehirePositions, ninehirePageUrl, NINEHIRE_SITE, type NhBlock } from "@/lib/ninehire";
+import { liveLabel, pageShortLabel, tabPages, type LiveKind } from "@/lib/live-blocks";
+import { LiveTabs } from "@/components/doc/LiveTabs";
+import { getNinehireLetters, getNinehireNews, getNinehirePage, getNinehirePositions, ninehirePageUrl, NINEHIRE_SITE, type NhBlock, type NhPara } from "@/lib/ninehire";
 
 /**
  * 연동 블록 (서버 컴포넌트): 채용 사이트의 최신 내용을 문서 본문 자리에 그려 넣는다.
@@ -15,6 +16,8 @@ export async function LiveBlock({ kind, arg }: { kind: LiveKind; arg: string | n
       return <Positions />;
     case "ninehire-page":
       return <Page page={arg ?? ""} />;
+    case "ninehire-tabs":
+      return <Tabs arg={arg} />;
   }
 }
 
@@ -160,46 +163,81 @@ async function Positions() {
   );
 }
 
+async function Tabs({ arg }: { arg: string | null }) {
+  const pages = tabPages(arg);
+  const tabs = pages.map((p) => ({ key: p, label: pageShortLabel(p) }));
+  // 패널은 서버에서 모두 그려 두고, 클라이언트 탭이 보이는 것만 바꾼다
+  return <LiveTabs tabs={tabs} panels={pages.map((p) => <Page key={p} page={p} />)} />;
+}
+
 async function Page({ page }: { page: string }) {
   const source = ninehirePageUrl(page || "home");
   const data = page ? await getNinehirePage(page) : null;
   if (!data) return <Unavailable source={source} label={liveLabel("ninehire-page", page || null)} />;
   return (
     <Frame source={source} label={data.title}>
-      <div className="live-page">
-        {data.sections.map((blocks, i) => (
-          <div key={i} className="live-section">
-            {blocks.map((b, j) => (
-              <Block key={j} block={b} />
+      <div className="nh-page">
+        {data.sections.map((sec, i) => (
+          <section key={i} className="nh-section">
+            {sec.layouts.map((lay, j) => (
+              <div key={j} className={`nh-row nh-cols-${Math.min(lay.columns.length, 4)}`}>
+                {lay.columns.map((col, k) => (
+                  <div key={k} className="nh-col">
+                    {col.map((b, n) => (
+                      <Block key={n} block={b} />
+                    ))}
+                  </div>
+                ))}
+              </div>
             ))}
-          </div>
+          </section>
         ))}
       </div>
     </Frame>
   );
 }
 
+/** 원문 글자 크기(px) → 위키 안에서의 크기 단계 */
+function paraClass(p: NhPara) {
+  if (p.size >= 36) return "nh-t1";
+  if (p.size >= 24) return "nh-t2";
+  if (p.size >= 19) return "nh-t3";
+  if (p.size <= 14) return "nh-t5";
+  return "nh-t4";
+}
+
 function Block({ block }: { block: NhBlock }) {
   switch (block.kind) {
-    case "heading":
-      return <h3>{block.text.replace(/\n/g, " ")}</h3>;
-    case "text": {
-      const lines = block.text.split("\n");
-      // "제목\n설명" 꼴(복지 카드 등)은 첫 줄을 굵게
-      if (lines.length > 1 && lines[0].length <= 30) {
-        return (
-          <p>
-            <strong>{lines[0]}</strong>
-            <br />
-            {lines.slice(1).join(" ")}
-          </p>
-        );
-      }
-      return <p>{lines.join(" ")}</p>;
+    case "text":
+      return (
+        <div className="nh-text">
+          {block.paras.map((p, i) =>
+            p.heading ? (
+              <h4 key={i} className={`${paraClass(p)} nh-align-${p.align}`} dangerouslySetInnerHTML={{ __html: p.html }} />
+            ) : (
+              <p key={i} className={`${paraClass(p)} nh-align-${p.align}`} dangerouslySetInnerHTML={{ __html: p.html }} />
+            ),
+          )}
+        </div>
+      );
+    case "image": {
+      // eslint-disable-next-line @next/next/no-img-element
+      const img = <img src={block.src} alt="" loading="lazy" className="nh-img" style={{ width: `${block.size}%` }} />;
+      return (
+        <div className={`nh-figure nh-align-${block.align}`}>
+          {block.href ? (
+            <a href={block.href} target="_blank" rel="noreferrer">
+              {img}
+            </a>
+          ) : (
+            img
+          )}
+        </div>
+      );
     }
     case "link":
       return (
-        <p>
+        <p className="nh-text">
           <a href={block.href} target="_blank" rel="noreferrer" className="btn-secondary h-9 px-4 text-[13.5px] no-underline">
             {block.text} ↗
           </a>
@@ -207,7 +245,7 @@ function Block({ block }: { block: NhBlock }) {
       );
     case "cards":
       return (
-        <ul>
+        <ul className="live-list grid gap-2 sm:grid-cols-2">
           {block.items.map((it, i) => (
             <li key={i}>
               {it.href ? (

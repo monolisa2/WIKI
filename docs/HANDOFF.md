@@ -20,7 +20,7 @@
 | 관리자 편집기 | 툴바(제목·굵게·목록·표·콜아웃·구분선·**문서 링크 선택기**·**조문 링크 선택기**·외부 링크), 좌우 실시간 미리보기, 아이콘 선택 | `src/components/editor/MarkdownEditor.tsx`, `IconField.tsx` |
 | 첨부 | 비공개 Storage 버킷 `attachments` + `document_attachments` 테이블, `/api/files/[id]` 2분 서명 URL, 편집 화면 업로드 패널, `/admin/files` 일괄 등록(`slug__파일명.ext`) | `…007_attachments.sql`, `src/components/admin/*`, `src/lib/files.ts` |
 | 브랜드 | CI 그린 `#7FBF31`, CI 블랙 `#040000`. 로고 SVG 컴포넌트, 파비콘, `public/enliple-logo.svg` | `src/components/Logo.tsx`, `src/app/icon.svg`, `globals.css` 토큰 |
-| **연동 블록** | 본문에 `[[live:ninehire-letter]]` · `[[live:ninehire-news]]` · `[[live:ninehire-positions]]` · `[[live:ninehire-page:culture|mobon|mobi|mobsoft|mobwith|anick|process|home]]` 한 줄을 쓰면 문서 화면에서 채용 사이트(enliple.ninehire.site) 최신 내용이 그 자리에 들어감. 서버 fetch + Next 데이터 캐시 **1시간**(`NINEHIRE_REVALIDATE`). 실패 시 원문 링크가 있는 경고 콜아웃만 표시. 편집기 툴바 "🔄 연동 블록" 버튼, 미리보기는 칩으로 표시 | `src/lib/live-blocks.ts`(토큰 파서), `src/lib/ninehire.ts`(HTML의 `__NEXT_DATA__` 파싱 + 공개 API), `src/components/doc/LiveBlock.tsx`, `DocBody.tsx` |
+| **연동 블록** | 본문에 `[[live:ninehire-letter]]` · `[[live:ninehire-news]]` · `[[live:ninehire-positions]]` · `[[live:ninehire-page:culture|mobon|mobi|mobsoft|mobwith|anick|process|home]]` · `[[live:ninehire-tabs:mobon,mobi,mobwith,mobsoft,anick]]`(탭) 한 줄을 쓰면 문서 화면에서 채용 사이트(enliple.ninehire.site) 최신 내용이 그 자리에 들어감. 서버 fetch + Next 데이터 캐시 **1시간**(`NINEHIRE_REVALIDATE`). 실패 시 원문 링크가 있는 경고 콜아웃만 표시. 페이지 블록은 나인하이어의 섹션 → 행 → 열 → 블록 구조와 **이미지·글자 크기·정렬을 그대로** 그린다(글만 뽑던 1차 버전은 어색해서 교체). 인라인 HTML 은 strong·em·br 만 남기고 이스케이프. 편집기 툴바 "🔄 연동 블록" 버튼, 미리보기는 칩으로 표시 | `src/lib/live-blocks.ts`(토큰 파서), `src/lib/ninehire.ts`(HTML의 `__NEXT_DATA__` 파싱 + 공개 API), `src/components/doc/LiveBlock.tsx`, `DocBody.tsx` |
 | 미공개 문서 링크 | 본문이 링크한 문서가 현재 사용자에게 보이지 않으면(초안 등) 링크 대신 회색 글자 + "준비 중" 칩. 문서 페이지가 링크된 slug 를 RLS 하에서 조회해 없는 것을 `missingSlugs` 로 넘김 | `src/app/(site)/docs/[slug]/page.tsx`, `src/components/Markdown.tsx` |
 
 ## DB 상태 (사용자가 SQL Editor 에서 실행한 순서)
@@ -33,8 +33,12 @@
 6. `batch5_update.sql` (회사 소개·연혁, 계열사 구조 초안, referral 포지션 표) — 7번이 덮어쓰므로 건너뛰어도 됨
 7. **`batch6_update.sql`** — 조직문화 분류(`culture`, 🌿) 신설 + `newsletter`(열일레터, 연동) · `how-we-work`(인라이플 컬처, 연동) · `training-contents`(교육 콘텐츠, 자리만) 신규, `company-overview` · `group-structure` · `referral` 를 안내게시판 톤으로 간결화하고 연동 블록 적용, 인덕스 스텁 15건 본문을 한 줄 + 관련 문서로 정리 — **사용자 실행 필요 (코드 배포 후)**
 8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
+9. **`batch7_update.sql`** — 계열사 구조 문서의 회사별 소개를 탭 블록 하나로 교체 — **사용자 실행 필요 (탭 코드 배포 후)**
 
 기대 상태: 7번까지 문서 88 / 공개 73 / "내용 수집 필요" 33, 8번까지 하면 공개 86. 로컬 검증으로 8번까지 적용 시 링크 439개 / 깨진 링크 0 확인함. **7번은 연동 블록을 렌더하는 코드가 배포된 뒤 실행**해야 한다(먼저 실행하면 `[[live:…]]` 글자가 그대로 보임).
+
+### 네이버웍스 게시판 글 (사용자 요청 2026-09-06)
+사용자가 준 board.worksmobile.com 링크 5개는 로그인 벽(auth.worksmobile.com 으로 리다이렉트)이라 세션에서 읽을 수 없다. 이 환경은 원격 컨테이너여서 사용자 PC 를 조작할 수도 없다. 받는 방법: 사용자가 게시글을 열어 **인쇄 → PDF 저장**(또는 전체 스크린샷) + 첨부 파일 다운로드 후 업로드. 이미지형 안내(포스터·제도표)는 원본 이미지 파일로 받아 문서 첨부 또는 본문 이미지로 쓴다. 이전 세션 zip 에는 이미지가 없었다(규정 docx 안의 그림은 회사 로고 1장뿐).
 
 ### "보이지 않는데 링크는 되는 문서" 정리 (사용자 질문 2026-09-06)
 - 신규입사자 To Do List, 사내 네트워크 설치 등 **온보딩 13건은 `draft`(작성 중)** 상태다. 임직원 RLS 는 published 만 보여주므로 일반 화면에서는 404 처럼 보이고, 관리자에게만 보인다.

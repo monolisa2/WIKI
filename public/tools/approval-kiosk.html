@@ -1,0 +1,5810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>위임전결 기준표 조회 · 인라이플</title>
+<style>
+  :root {
+    --bg: #eef8e6;
+    --surface: #ffffff;
+    --surface-2: #eaf6d9;
+    --line: #d7ecc0;
+    --line-strong: #b3d98c;
+    --text: #1c2a12;
+    --muted: #5c7048;
+    --brand: #5c9a22;
+    --brand-2: #7fbf31;
+    --brand-soft: #e3f2c9;
+    --accent: #3e6b18;
+    --seal: #a5312b;
+    --slate: #3e5468;
+    --slate-soft: #dfe6ea;
+    --report: #7a7150;
+    --report-soft: #eeeada;
+    --warn-bg: #fff7df;
+    --warn-line: #e8cf76;
+    --warn-text: #6d5510;
+    --shadow: 0 12px 40px rgba(60, 110, 30, 0.10);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Pretendard", sans-serif; background: var(--bg); color: var(--text); }
+  body { overflow: hidden; }
+  :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+
+  .page {
+    height: 100vh; display: grid; grid-template-rows: 68px 1fr; padding: 12px; gap: 10px;
+    background:
+      radial-gradient(circle at top right, rgba(127,191,49,0.14), transparent 26%),
+      linear-gradient(180deg, #f4fbee 0%, #e7f5d8 100%);
+  }
+  .topbar {
+    background: rgba(255,255,255,0.85); border: 1px solid rgba(179,217,140,0.9);
+    backdrop-filter: blur(12px); border-radius: 18px; padding: 8px 18px;
+    display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow);
+  }
+  .title-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; color: var(--brand); text-transform: uppercase; display:flex; align-items:center; gap:6px; }
+  .eyebrow .dot { width:6px; height:6px; border-radius:50%; background: var(--brand-2); display:inline-block; }
+  h1 { margin: 0; font-size: 21px; line-height: 1.08; letter-spacing: -0.02em; }
+  .sub { font-size: 11.5px; color: var(--muted); }
+  .hero-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .badge { background: var(--brand-soft); color: var(--accent); border: 1px solid #cfe8ab; min-height: 28px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 700; }
+
+  .main { min-height: 0; display: grid; grid-template-columns: minmax(360px, 30vw) 1fr; gap: 10px; }
+  .panel { min-height: 0; background: rgba(255,255,255,0.95); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+
+  .left { display: flex; flex-direction: column; padding: 14px; gap: 10px; overflow-y: auto; }
+  .section-title { margin: 0 0 3px; font-size: 15px; letter-spacing: -0.01em; }
+  .helper { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+  .company-field { flex: none; }
+  .select-grid { display: grid; grid-template-columns: 1fr; gap: 8px; flex: none; }
+  .field { display: grid; gap: 3px; }
+  .label { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+  select, input { width: 100%; height: 42px; border: 1px solid var(--line-strong); border-radius: 12px; padding: 0 12px; font-size: 14px; background: #fff; color: var(--text); outline: none; transition: 0.15s ease; font-family: inherit; }
+  select:focus, input:focus { border-color: var(--brand-2); box-shadow: 0 0 0 4px rgba(127,191,49,0.16); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1px; }
+  button { border: 0; border-radius: 12px; height: 40px; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: transform .12s ease, opacity .12s ease; font-family: inherit; }
+  button:hover { transform: translateY(-1px); }
+  .primary { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%); color: #fff; }
+  .secondary { background: #f5faf0; color: var(--text); border: 1px solid var(--line); }
+
+  .search-wrap { position: relative; flex: none; }
+  .search-box { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); position: relative; z-index: 21; }
+  .search-row { display: grid; grid-template-columns: 1fr 76px; gap: 6px; }
+  .search-row select, .search-row input { height: 38px; font-size: 13.5px; }
+  .count { color: var(--muted); font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 14px; }
+  .count .scroll-hint { color: var(--brand); font-weight: 800; display: none; align-items: center; gap: 4px; }
+  .count .scroll-hint.show { display: inline-flex; }
+  .dropdown-list {
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20;
+    background: #fff; border: 1.5px solid var(--brand-2); border-radius: 14px; box-shadow: 0 16px 40px rgba(60,110,30,0.20);
+    max-height: 300px; overflow-y: auto; display: none; grid-gap: 8px; padding: 8px;
+    scrollbar-width: thin; scrollbar-color: var(--brand-2) transparent;
+  }
+  .dropdown-list.open { display: grid; }
+  .dropdown-list::-webkit-scrollbar { width: 9px; }
+  .dropdown-list::-webkit-scrollbar-track { background: transparent; }
+  .dropdown-list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
+  .dropdown-list::-webkit-scrollbar-thumb:hover { background: var(--brand-2); }
+  .dropdown-fade {
+    position: absolute; left: 8px; right: 16px; bottom: 6px; height: 24px; border-radius: 0 0 14px 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.96) 100%);
+    pointer-events: none; opacity: 0; transition: opacity .15s ease;
+  }
+  .dropdown-list.has-overflow .dropdown-fade { opacity: 1; }
+  .item { border: 1.5px solid var(--line); border-radius: 12px; padding: 9px 11px; background: #fff; cursor: pointer; transition: .15s ease; display: grid; gap: 4px; }
+  .item:hover { border-color: var(--brand-2); box-shadow: 0 6px 20px rgba(127,191,49,0.12); }
+  .item.active { border-color: var(--brand); background: #f5fbee; box-shadow: 0 0 0 3px rgba(127,191,49,0.18); }
+  .item-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .doctype-badge { display: inline-flex; align-items: center; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px; border: 1.5px solid; white-space: nowrap; letter-spacing: -0.01em; }
+  .item-company { font-size: 10.5px; color: var(--muted); font-weight: 700; text-align: right; }
+  .item-detail { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.35; word-break: keep-all; }
+  .item-approver { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .item-sub { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+
+
+  .right { display: grid; grid-template-rows: auto auto 1fr auto; padding: 16px; gap: 10px; min-height: 0; }
+  .result-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .result-title-wrap { display:flex; flex-direction: column; gap: 2px; }
+  .result-eyebrow { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .result-title { margin: 0; font-size: 17px; }
+  .approver-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 14px; border-radius: 999px; background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%); color: #fff; font-size: 12.5px; font-weight: 800; box-shadow: 0 6px 18px rgba(92,154,34,0.28); }
+  .approver-chip .tag { font-size: 11px; opacity: .85; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+
+  .steps-card { background: linear-gradient(135deg, #eef9e2 0%, #f9fdf6 100%); border: 1px solid #cfe7a8; border-radius: 16px; padding: 12px 14px; }
+  .line-kicker { color: var(--muted); font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .steps-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 0; max-height: 150px; overflow-y: auto; padding: 4px 2px; }
+  .step-box {
+    min-width: 78px; border: 2px solid var(--line); border-radius: 8px; padding: 6px 8px 6px;
+    text-align: center; background: #fff; position: relative; margin: 4px 2px;
+  }
+  .step-box .num { font-size: 9px; color: var(--muted); letter-spacing: .03em; font-weight: 700; }
+  .step-box .role { font-weight: 800; font-size: 12.5px; margin-top: 2px; word-break: keep-all; line-height: 1.15; }
+  .step-box .kind { display: inline-block; font-size: 11px; letter-spacing: .01em; margin-top: 5px; font-weight: 800; padding: 2px 10px; border-radius: 999px; color: #fff; }
+  .step-box.appr { border-color: var(--brand-2); background: var(--brand-soft); }
+  .step-box.appr .kind { background: var(--accent); }
+  .step-box.agree { border-color: var(--slate); border-style: dashed; background: var(--slate-soft); }
+  .step-box.agree .kind { background: var(--slate); }
+  .step-box.report { border-color: var(--report); border-style: dotted; background: var(--report-soft); }
+  .step-box.report .kind { background: var(--report); }
+  .step-box.final { border-color: var(--seal); border-width: 3px; box-shadow: 0 0 0 3px rgba(165,49,43,.09); }
+  .step-box.final .kind { background: var(--seal); }
+  .step-box.final::after {
+    content: "결"; position: absolute; top: -10px; right: -8px; width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--seal); color: var(--seal); background: #fff; font-weight: 800; font-size: 10px;
+    display: flex; align-items: center; justify-content: center; transform: rotate(-10deg);
+  }
+  .step-arrow { color: var(--line-strong); font-size: 13px; padding: 0 2px; align-self: center; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; min-height: 0; }
+  .info-card { min-height: 0; border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 12px; display: grid; grid-template-rows: auto 1fr; gap: 6px; overflow: auto; }
+  .card-head { font-size: 13px; font-weight: 800; }
+  .meta { display: grid; gap: 6px; align-content: start; }
+  .row { display: grid; grid-template-columns: 96px 1fr; gap: 8px; padding-bottom: 6px; border-bottom: 1px dashed #dcecc8; }
+  .row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .key { color: var(--muted); font-size: 11.5px; font-weight: 700; }
+  .val { font-size: 13px; font-weight: 700; line-height: 1.35; white-space: pre-wrap; word-break: keep-all; }
+  .process { min-height: 0; overflow: auto; border: 1px solid var(--line); border-radius: 14px; background: #fafefa; padding: 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: keep-all; }
+  .warning { display: none; border: 1px solid var(--warn-line); background: var(--warn-bg); color: var(--warn-text); border-radius: 12px; padding: 8px 10px; font-size: 12px; line-height: 1.4; font-weight: 700; }
+  .footer-tip { color: var(--muted); font-size: 10.5px; text-align: right; }
+
+  @media (max-width: 1400px) {
+    .main { grid-template-columns: 320px 1fr; }
+  }
+  @media (max-width: 1080px) {
+    body { overflow: auto; }
+    .page { height: auto; min-height: 100vh; grid-template-rows: auto 1fr; }
+    .main { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    .dropdown-list { max-height: 280px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print {
+    body { overflow: visible; }
+    .left, .hero-badges { display: none; }
+    .page { height: auto; grid-template-rows: auto; }
+    .main { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="topbar">
+    <div class="title-wrap">
+      <div class="eyebrow"><span class="dot"></span>ENLIPLE APPROVAL KIOSK</div>
+      <h1>위임전결 기준표 빠른 조회</h1>
+      <div class="sub">공용 모니터에 띄워두고 누구나 조건만 고르면 결재라인이 바로 보입니다</div>
+    </div>
+    <div class="hero-badges">
+      <div class="badge">2026-07-01 시행</div>
+      <div class="badge">인라이플 · 자회사</div>
+      <div class="badge" id="ruleCountBadge">총 0건</div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="panel left">
+      <div>
+        <h2 class="section-title">빠른 검색</h2>
+        <div class="helper">먼저 회사를 선택하고, 키워드(예: 서버비, 상품권, 계약)를 입력하면 아래로 검색 결과가 펼쳐집니다. 원하는 항목을 클릭하면 조건이 자동으로 선택되고 오른쪽에 결재라인이 바로 표시됩니다.</div>
+      </div>
+
+      <div class="field company-field"><div class="label">회사</div><select id="company"></select></div>
+
+      <div class="search-wrap">
+        <div class="search-box">
+          <div class="label">빠른 검색</div>
+          <div class="search-row">
+            <input id="keyword" placeholder="예: 서버비, 상품권, 계약, 휴가" autocomplete="off" />
+            <button class="secondary" id="searchBtn">검색</button>
+          </div>
+          <div class="count"><span id="countText"></span><span class="scroll-hint" id="scrollHint">↓ 스크롤해서 더 보기</span></div>
+        </div>
+        <div class="dropdown-list" id="resultList"></div>
+      </div>
+
+      <div class="select-grid">
+        <div class="field"><div class="label">대분류</div><select id="category"></select></div>
+        <div class="field"><div class="label">문서유형</div><select id="docType"></select></div>
+        <div class="field"><div class="label">세부내용</div><select id="detail"></select></div>
+        <div class="field"><div class="label">상세조건</div><select id="condition"></select></div>
+        <div class="actions">
+          <button class="primary" id="findBtn">결재라인 보기</button>
+          <button class="secondary" id="resetBtn">초기화</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel right">
+      <div class="result-top">
+        <div class="result-title-wrap">
+          <div class="result-eyebrow" id="resultEyebrow">조건을 선택해 주세요</div>
+          <h2 class="result-title" id="resultTitle">조회 결과</h2>
+        </div>
+        <div class="approver-chip" id="finalApproverChip"><span class="tag">최종 결재</span><span id="finalApproverName">-</span></div>
+      </div>
+
+      <div class="steps-card">
+        <div class="line-kicker">전체 진행 순서</div>
+        <div class="steps-strip" id="stepsStrip"></div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="card-head">기준 정보</div>
+          <div class="meta" id="meta"></div>
+        </div>
+      </div>
+
+      <div class="warning" id="warningBox"></div>
+      <div class="footer-tip">아마란스10 위임전결기준표 · 전사배포용 기준 반영</div>
+    </section>
+  </main>
+</div>
+
+<script id="doa-data" type="application/json">[
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "계약서 검토 관련",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "회계팀 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 회계팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "계약 검토 관련(보증보험 관련)",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "회계팀 → 총무팀 → 총무팀장 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 총무팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 총무팀장 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의",
+  "notice": "총무팀장은 합의라인이며, 최종 결재권자(종결)는 부서장(사업부장)입니다. (총무팀장은 종결권자 아님)",
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "총무팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "서버비(금액 무관)",
+  "condition": null,
+  "final": "대표이사(수기결재)",
+  "agreeline": "백상원 → 박원성 → 최세현 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 박원성 합의 / 최세현 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "모비온 대행수수료",
+  "condition": "월 100만원 미만",
+  "final": "부대표이사",
+  "agreeline": "송현아 → 양환동 → 김수연 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 송현아 합의 / 양환동 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 부대표이사 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "송현아",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "양환동",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "부대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "모비온 대행수수료",
+  "condition": "월 100만원 이상",
+  "final": "대표이사(수기결재)",
+  "agreeline": "송현아 → 양환동 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 송현아 합의 / 양환동 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 부대표이사 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "송현아",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "양환동",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "부대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "월 지출금액 100만원 미만 or 연 누적 1,200만원 미만",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "월 지출금액 100만원 이상 or 연 누적 1,200만원 이상",
+  "condition": null,
+  "final": "대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "상품권(금액 무관, 기프티콘 포함)",
+  "condition": "프로모션 제외",
+  "final": "대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "상품권(금액 무관, 기프티콘 포함)",
+  "condition": "프로모션",
+  "final": "부대표이사",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 부대표이사 결재 > 7. 김수연 합의 > 8. 회계팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "부대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "서버비 및 서버PC,부품 등",
+  "condition": "서버비(금액무관)",
+  "final": "대표이사(수기결재)",
+  "agreeline": "백상원 → 박원성 → 최세현 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 박원성 합의 / 최세현 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "서버비 및 서버PC,부품 등",
+  "condition": "서버PC, 부품 등",
+  "final": "대표이사(수기결재)",
+  "agreeline": "류강훈 → 박원성 → 최세현 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 류강훈 합의 / 박원성 합의 / 최세현 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "모비온 대행수수료",
+  "condition": "월 100만원 미만",
+  "final": "부대표이사",
+  "agreeline": "송현아 → 양환동 → 김수연 → 재무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 송현아 합의 / 양환동 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 부대표이사 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "송현아",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "양환동",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "부대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "모비온 대행수수료",
+  "condition": "월 100만원 이상",
+  "final": "대표이사(수기결재)",
+  "agreeline": "송현아 → 양환동 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 송현아 합의 / 양환동 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 부대표이사 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "송현아",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "양환동",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "부대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "월 지출금액 100만원 미만 or 연 누적 1,200만원 미만",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "월 지출금액 100만원 이상 or 연 누적 1,200만원 이상",
+  "condition": null,
+  "final": "대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "매출환불(모비온 제외)",
+  "condition": "100만원 미만",
+  "final": "부서장(사업부장)",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "매출환불(모비온 제외)",
+  "condition": "100만원 이상",
+  "final": "대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 부대표이사 결재 > 8. 재무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "부대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "(급여성) 품의서\n(사전 품의서 사용)",
+  "detail": "계좌이체 지급",
+  "condition": "금액 무관",
+  "final": "대표이사(수기결재)",
+  "agreeline": "박민희 → 인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서_법인카드",
+  "detail": "금액무관",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "백상원 → 김수연",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서_개인경비",
+  "detail": "10만원 미만",
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "백상원 → 김수연",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 김수연 합의 > 3. 팀장 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서_개인경비",
+  "detail": "10만원 이상",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "백상원 → 김수연",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "협조전",
+  "detail": "사업(프로젝트) 계획, 사업(프로젝트)계약, 양해각서, 의향서체결",
+  "condition": null,
+  "final": "대표이사(수기결재)",
+  "agreeline": "관련부서 팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": "회계팀장,인사팀장,\n재무관리실장",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 관련부서 팀장 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "관련부서 팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "구독형 소프트웨어/\n도메인관련",
+  "condition": "100만원 미만",
+  "final": "부서장(사업부장)",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 류강훈 합의 > 8. 총무팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "구독형 소프트웨어/\n도메인관련",
+  "condition": "100만원 이상",
+  "final": "대표이사(수기결재)",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 류강훈 합의 > 8. 총무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "서버PC / 서버PC 부품 등",
+  "condition": "금액 무관",
+  "final": "대표이사(수기결재)",
+  "agreeline": "류강훈 → 박원성 → 최세현 → 김수연 → 총무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 류강훈 합의 / 박원성 합의 / 최세현 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김수연 합의 > 8. 총무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "유형자산 & 무형자산",
+  "condition": "100만원 미만",
+  "final": "부서장(사업부장)",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 류강훈 합의 > 8. 총무팀장 합의 > 9. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "유형자산 & 무형자산",
+  "condition": "100만원 이상",
+  "final": "대표이사(수기결재)",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 류강훈 합의 > 8. 총무팀장 합의 > 9. 재무관리실장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "휴가신청서",
+  "detail": null,
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "인사팀장",
+  "cc": "업무대행자",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 보고 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "보고"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "새벽근무 신청서",
+  "detail": "기존 그룹웨어",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "재택근무신청서",
+  "detail": "기존 그룹웨어",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "근태정정요청서",
+  "detail": "기존 그룹웨어(지각 포함)",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "출장/외근신청서",
+  "detail": "기존 그룹웨어 / 출장(시외,시내,해외), 외근(직출,직퇴,종일)",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "지각/조퇴사유서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "복지휴가신청서",
+  "detail": "지금만나러갑니다,장기근속,생일,특별",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "기타휴가신청서",
+  "detail": "건강검진, 태아검진, 예비군, 무급휴가",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "근태신청",
+  "doctype": "경조휴가신청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박선영 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "인사관련신청",
+  "doctype": "인재채용품의서(JD)",
+  "detail": "신규 TO채용",
+  "condition": null,
+  "final": "대표이사(수기결재)",
+  "agreeline": "김세연-박도영 → 인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김세연-박도영 합의 > 8. 인사팀장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김세연-박도영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "인사관련신청",
+  "doctype": "인재채용품의서(JD)",
+  "detail": "결원 TO채용",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "김세연-박도영 → 인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 김세연-박도영 합의 > 8. 인사팀장 합의 > 10. 경영관리본부장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김세연-박도영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "인사관련신청",
+  "doctype": "시말서",
+  "detail": null,
+  "condition": null,
+  "final": "대표이사(수기결재)",
+  "agreeline": "인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 인사팀장 합의 > 10. 경영관리본부장 합의 > 11. 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "인사관련신청",
+  "doctype": "휴직신청서",
+  "detail": "유사산,병가,가족돌봄(무급)",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희-박선영 합의 > 8. 인사팀장 합의 > 11. 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "인사관련신청",
+  "doctype": "출산및육아휴직신청서",
+  "detail": "출산휴가,육아휴직,배우자출산휴가",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희-박선영 합의 > 8. 인사팀장 합의 > 11. 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "인사관련신청",
+  "doctype": "복직신청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희-박선영 합의 > 8. 인사팀장 합의 > 11. 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "복지신청",
+  "doctype": "경조화환신청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "류강훈 → 총무팀장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 류강훈 합의 > 8. 총무팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "복지신청",
+  "doctype": "경조금신청서",
+  "detail": null,
+  "condition": null,
+  "final": "상신자",
+  "agreeline": "박선영 → 인사팀장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 7. 박선영 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "교육신청",
+  "doctype": "외부교육신청서",
+  "detail": "근로시간 중 교육,세미나,컨퍼런스,설명회 등",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박소윤 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박소윤 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박소윤",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "교육신청",
+  "doctype": "외부교육신청서",
+  "detail": "근로시간이 아닌 교육,세미나,컨퍼런스,설명회 등",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박소윤 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박소윤 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박소윤",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "교육신청",
+  "doctype": "교육결과보고서",
+  "detail": "외부교육수강 후 결과보고서 작성",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박소윤 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박소윤 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박소윤",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "업무협조",
+  "doctype": "날인신청서",
+  "detail": "계약서 및 공문 등 날인 요청용 / 검토는 사전품의서",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "변재훈 → 총무팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 8. 총무팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "총무팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "업무협조",
+  "doctype": "법인카드&상품권 반출신청서",
+  "detail": "법인카드 한도증액, 반출요청, 상품권, 회식비 신청 시 사용하는 문서",
+  "condition": null,
+  "final": "상신자",
+  "agreeline": "김수연 → 유숙진",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 김수연 합의 > 7. 유숙진 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "유숙진",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "업무협조",
+  "doctype": "DB 계정 생성 및 변경 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "이예진 → 박혁진",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 이예진 합의 / 박혁진 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "이예진",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "박혁진",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "업무협조",
+  "doctype": "DB 작업 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "이예진 → 박혁진",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 이예진 합의 / 박혁진 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "이예진",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "박혁진",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "업무협조",
+  "doctype": "방화벽 정책 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "김용연",
+  "cc": "서현승,정철원,최세현",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 7. 김용연 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "김용연",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "업무협조",
+  "doctype": "서버 계정 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "정철원",
+  "cc": "서현승,최세현",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 7. 정철원 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "정철원",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "퇴사신청",
+  "doctype": "사직서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박민희-박선영 합의 > 8. 인사팀장 합의 > 11. 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "퇴사신청",
+  "doctype": "업무인수인계서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박선영 → 인사팀장",
+  "cc": "대표님 비서",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 박선영 합의 > 8. 인사팀장 합의 > 11. 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 11,
+    "role": "대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "인라이플",
+  "category": "퇴사신청",
+  "doctype": "퇴사전체크사항",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "변재훈-박선영-김수연 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 변재훈-박선영-김수연 합의 > 8. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "변재훈-박선영-김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "계약서 검토 관련",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "회계팀 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 회계팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "계약 검토 관련(보증보험 관련)",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "회계팀 → 총무팀 → 총무팀장 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 총무팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 총무팀장 합의 > 7. 회계팀장 합의 > 8. 재무관리실장 합의",
+  "notice": "총무팀장은 합의라인이며, 최종 결재권자(종결)는 자회사 대표이사입니다. (총무팀장은 종결권자 아님)",
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "총무팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "서버비 (금액 무관)",
+  "condition": null,
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "백상원 → 박원성 → 최세현 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 박원성 합의 / 최세현 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김수연 합의 > 7. 회계팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "월 지출금액 300만원 미만 or 연 누적 3,600만원 미만",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김수연 합의 > 7. 회계팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "월 지출금액 300만원 이상 or 연 누적 3,600만원 이상",
+  "condition": null,
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김수연 합의 > 7. 회계팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "상품권(금액 무관, 기프티콘 포함)",
+  "condition": "프로모션 제외",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김수연 합의 > 7. 회계팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "사전품의서",
+  "detail": "상품권(금액 무관, 기프티콘 포함)",
+  "condition": "프로모션",
+  "final": "자회사 대표이사",
+  "agreeline": "회계팀 → 김수연 → 회계팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김수연 합의 > 7. 회계팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "회계팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "서버비 및 서버PC,부품 등",
+  "condition": "서버비(금액무관)",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "백상원 → 박원성 → 최세현 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 박원성 합의 / 최세현 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 재무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "서버비 및 서버PC,부품 등",
+  "condition": "서버PC, 부품 등",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "류강훈 → 박원성 → 최세현 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 류강훈 합의 / 박원성 합의 / 최세현 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 재무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "월 지출금액 300만원 미만 or 연 누적 3,600만원 미만",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 재무팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "월 지출금액 300만원 이상 or 연 누적 3,600만원 이상",
+  "condition": null,
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 재무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "매출환불(모비온 제외)",
+  "condition": "100만원 미만",
+  "final": "자회사 대표이사",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 재무팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서",
+  "detail": "매출환불(모비온 제외)",
+  "condition": "100만원 이상",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "회계팀 → 김수연 → 재무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 회계팀 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 재무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "회계팀",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "재무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서_법인카드",
+  "detail": "금액무관",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "백상원 → 김수연",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서_개인경비",
+  "detail": "10만원 미만",
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "백상원 → 김수연",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 김수연 합의 > 3. 팀장 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "지출결의서_개인경비",
+  "detail": "10만원 이상",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "백상원 → 김수연",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 2. 백상원 합의 / 김수연 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "백상원",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "(급여성) 품의서\n(사전 품의서 사용)",
+  "detail": "계좌이체 지급",
+  "condition": "금액 무관",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "박민희 → 인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 5. 자회사 대표이사 결재 > 6. 박민희 합의 > 7. 인사팀장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "협조전",
+  "detail": "사업(프로젝트) 계획, 사업(프로젝트)계약, 양해각서, 의향서체결",
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "관련부서 팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": "회계팀장,인사팀장,\n재무관리실장",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 관련부서 팀장 합의 > 3. 팀장 결재 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "관련부서 팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "구독형 소프트웨어/\n도메인관련",
+  "condition": "300만원 미만",
+  "final": "자회사 대표이사",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 류강훈 합의 > 7. 총무팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "구독형 소프트웨어/\n도메인관련",
+  "condition": "300만원 이상",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 류강훈 합의 > 7. 총무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "서버PC / 서버PC 부품 등",
+  "condition": "금액 무관",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "류강훈 → 박원성 → 최세현 → 김수연 → 총무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 류강훈 합의 / 박원성 합의 / 최세현 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김수연 합의 > 7. 총무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "박원성",
+    "kind": "합의"
+   },
+   {
+    "n": 2,
+    "role": "최세현",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "유형자산 & 무형자산",
+  "condition": "300만원 미만",
+  "final": "자회사 대표이사",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 류강훈 합의 > 7. 총무팀장 합의 > 8. 재무관리실장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "자금지출 및 기안",
+  "doctype": "자산(비품)구입 신청서",
+  "detail": "유형자산 & 무형자산",
+  "condition": "300만원 이상",
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "변재훈 → 류강훈 → 총무팀장 → 재무관리실장 → 경영관리본부장",
+  "cc": null,
+  "dept": "법인카드 결제\nㄴ 총무팀\n계좌이체\nㄴ 재무팀",
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 류강훈 합의 > 7. 총무팀장 합의 > 8. 재무관리실장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 8,
+    "role": "재무관리실장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "휴가신청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "인사팀장",
+  "cc": "업무대행자",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "새벽근무 신청서",
+  "detail": "기존 그룹웨어",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "재택근무신청서",
+  "detail": "기존 그룹웨어",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "근태정정요청서",
+  "detail": "기존 그룹웨어(지각 포함)",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "출장/외근신청서",
+  "detail": "기존 그룹웨어 / 출장(시외,시내,해외), 외근(직출,직퇴,종일)",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "지각/조퇴사유서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "복지휴가신청서",
+  "detail": "지금만나러갑니다,장기근속,생일,특별",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "기타휴가신청서",
+  "detail": "건강검진, 태아검진, 예비군, 무급휴가",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박민희 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 보고 > 6. 박민희 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "보고"
+   },
+   {
+    "n": 6,
+    "role": "박민희",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "근태신청",
+  "doctype": "경조휴가신청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 박선영 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "인사관련신청",
+  "doctype": "인재채용품의서(JD)",
+  "detail": "신규 TO채용",
+  "condition": null,
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "김세연-박도영 → 인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김세연-박도영 합의 > 7. 인사팀장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김세연-박도영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "인사관련신청",
+  "doctype": "인재채용품의서(JD)",
+  "detail": "결원 TO채용",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "김세연-박도영 → 인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 김세연-박도영 합의 > 7. 인사팀장 합의 > 9. 경영관리본부장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김세연-박도영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "인사관련신청",
+  "doctype": "시말서",
+  "detail": null,
+  "condition": null,
+  "final": "인라이플 대표이사(수기결재)",
+  "agreeline": "인사팀장 → 경영관리본부장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 7. 인사팀장 합의 > 9. 경영관리본부장 합의 > 10. 인라이플 대표이사(수기결재) 결재",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 9,
+    "role": "경영관리본부장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "결재"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "인사관련신청",
+  "doctype": "휴직신청서",
+  "detail": "유사산,병가,가족돌봄(무급)",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 박민희-박선영 합의 > 7. 인사팀장 합의 > 10. 인라이플 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "인사관련신청",
+  "doctype": "출산및육아휴직신청서",
+  "detail": "출산휴가,육아휴직,배우자출산휴가",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 박민희-박선영 합의 > 7. 인사팀장 합의 > 10. 인라이플 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "인사관련신청",
+  "doctype": "복직신청서",
+  "detail": null,
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 박민희-박선영 합의 > 7. 인사팀장 합의 > 10. 인라이플 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "복지신청",
+  "doctype": "경조화환신청서",
+  "detail": null,
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "류강훈 → 총무팀장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 류강훈 합의 > 7. 총무팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "류강훈",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "복지신청",
+  "doctype": "경조금신청서",
+  "detail": null,
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "박선영 → 인사팀장",
+  "cc": null,
+  "dept": "재무팀",
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 6. 박선영 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "교육신청",
+  "doctype": "외부교육신청서",
+  "detail": "근로시간 중 교육,세미나,컨퍼런스,설명회 등",
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "박소윤 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 박소윤 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박소윤",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "교육신청",
+  "doctype": "외부교육신청서",
+  "detail": "근로시간이 아닌 교육,세미나,컨퍼런스,설명회 등",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박소윤 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 박소윤 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박소윤",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "교육신청",
+  "doctype": "교육결과보고서",
+  "detail": "외부교육수강 후 결과보고서 작성",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "박소윤 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 박소윤 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박소윤",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "업무협조",
+  "doctype": "날인신청서",
+  "detail": "계약서 및 공문 등 날인 요청용 / 검토는 사전품의서",
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "변재훈 → 총무팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 변재훈 합의 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 7. 총무팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "변재훈",
+    "kind": "합의"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 7,
+    "role": "총무팀장",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "업무협조",
+  "doctype": "법인카드&상품권 반출신청서",
+  "detail": "법인카드 한도증액, 반출요청, 상품권, 회식비 신청 시 사용하는 문서",
+  "condition": null,
+  "final": "상신자",
+  "agreeline": "김수연 → 유숙진",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 2. 김수연 합의 > 6. 유숙진 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 2,
+    "role": "김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 6,
+    "role": "유숙진",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "업무협조",
+  "doctype": "DB 계정 생성 및 변경 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "이예진 → 박혁진",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 이예진 합의 / 박혁진 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "이예진",
+    "kind": "합의"
+   },
+   {
+    "n": 6,
+    "role": "박혁진",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "업무협조",
+  "doctype": "DB 작업 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "이예진 → 박혁진",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 이예진 합의 / 박혁진 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "이예진",
+    "kind": "합의"
+   },
+   {
+    "n": 6,
+    "role": "박혁진",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "업무협조",
+  "doctype": "방화벽 정책 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "김용연",
+  "cc": "서현승,정철원,최세현",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 6. 김용연 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "김용연",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "업무협조",
+  "doctype": "서버 계정 요청서",
+  "detail": null,
+  "condition": null,
+  "final": "팀장",
+  "agreeline": "정철원",
+  "cc": "서현승,최세현",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 6. 정철원 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "정철원",
+    "kind": "합의"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "퇴사신청",
+  "doctype": "사직서",
+  "detail": null,
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "박민희-박선영 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 박민희-박선영 합의 > 7. 인사팀장 합의 > 10. 인라이플 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박민희-박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "퇴사신청",
+  "doctype": "업무인수인계서",
+  "detail": null,
+  "condition": null,
+  "final": "자회사 대표이사",
+  "agreeline": "박선영 → 인사팀장",
+  "cc": "대표님 비서",
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 5. 자회사 대표이사 결재 > 6. 박선영 합의 > 7. 인사팀장 합의 > 10. 인라이플 대표이사(수기결재) 보고",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 5,
+    "role": "자회사 대표이사",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "박선영",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   },
+   {
+    "n": 10,
+    "role": "인라이플 대표이사(수기결재)",
+    "kind": "보고"
+   }
+  ]
+ },
+ {
+  "company": "자회사",
+  "category": "퇴사신청",
+  "doctype": "퇴사전체크사항",
+  "detail": null,
+  "condition": null,
+  "final": "부서장(사업부장)",
+  "agreeline": "변재훈-박선영-김수연 → 인사팀장",
+  "cc": null,
+  "dept": null,
+  "seq": "1. 상신자 결재 > 3. 팀장 결재 > 4. 부서장(사업부장) 결재 > 6. 변재훈-박선영-김수연 합의 > 7. 인사팀장 합의",
+  "notice": null,
+  "steps": [
+   {
+    "n": 1,
+    "role": "상신자",
+    "kind": "결재"
+   },
+   {
+    "n": 3,
+    "role": "팀장",
+    "kind": "결재"
+   },
+   {
+    "n": 4,
+    "role": "부서장(사업부장)",
+    "kind": "결재"
+   },
+   {
+    "n": 6,
+    "role": "변재훈-박선영-김수연",
+    "kind": "합의"
+   },
+   {
+    "n": 7,
+    "role": "인사팀장",
+    "kind": "합의"
+   }
+  ]
+ }
+]</script>
+<script>(function () {
+  var rules = JSON.parse(document.getElementById('doa-data').textContent);
+
+  // 실제 조직명 6개를 노출하고, 내부적으로는 인라이플/자회사 두 기준표(ruleset)에 매핑한다.
+  var COMPANY_OPTIONS = ['인라이플', '모비위드', '모비소프트', '에이닉', '미디어게인', '티앱스토어'];
+  var COMPANY_TO_RULESET = {
+    '인라이플': '인라이플',
+    '모비위드': '자회사',
+    '모비소프트': '자회사',
+    '에이닉': '자회사',
+    '미디어게인': '자회사',
+    '티앱스토어': '자회사'
+  };
+  function rulesetOf(displayCompany) { return COMPANY_TO_RULESET[displayCompany] || displayCompany; }
+
+  var els = {
+    company: document.getElementById('company'),
+    category: document.getElementById('category'),
+    docType: document.getElementById('docType'),
+    detail: document.getElementById('detail'),
+    condition: document.getElementById('condition'),
+    keyword: document.getElementById('keyword'),
+    resultList: document.getElementById('resultList'),
+    countText: document.getElementById('countText'),
+    scrollHint: document.getElementById('scrollHint'),
+    searchWrap: document.querySelector('.search-wrap'),
+    stepsStrip: document.getElementById('stepsStrip'),
+    finalApproverChip: document.getElementById('finalApproverChip'),
+    finalApproverName: document.getElementById('finalApproverName'),
+    resultEyebrow: document.getElementById('resultEyebrow'),
+    resultTitle: document.getElementById('resultTitle'),
+    meta: document.getElementById('meta'),
+    warningBox: document.getElementById('warningBox'),
+    ruleCountBadge: document.getElementById('ruleCountBadge')
+  };
+
+  els.ruleCountBadge.textContent = '총 ' + rules.length + '건';
+
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  // 값이 처음 등장한 순서를 그대로 유지 (원본 위임전결 기준표의 행 순서와 동일하게 유지 — 가나다순 정렬 금지)
+  function uniqInOrder(arr) {
+    var seen = [];
+    arr.forEach(function (v) { if (v !== null && v !== undefined && seen.indexOf(v) === -1) seen.push(v); });
+    return seen;
+  }
+
+  function fillSelect(el, values) {
+    el.innerHTML = values.map(function (v) {
+      return '<option value="' + esc(v) + '">' + (v || '없음') + '</option>';
+    }).join('');
+  }
+
+  // filters.company 는 화면표시용 회사명(예: 모비위드)이며, 내부 비교 시 ruleset으로 변환한다.
+  function matchesFilters(r, filters) {
+    return Object.keys(filters).every(function (k) {
+      var want = filters[k];
+      if (!want) return true;
+      if (k === 'company') return r.company === rulesetOf(want);
+      return (r[k] || '') === want;
+    });
+  }
+
+  function optionsFor(field, filters) {
+    var list = rules.filter(function (r) { return matchesFilters(r, filters); })
+      .map(function (r) { return r[field] || ''; });
+    return uniqInOrder(list); // 원본 시트 순서 그대로
+  }
+
+  function resetCascade(defaultCompany) {
+    els.company.value = defaultCompany;
+    fillSelect(els.category, optionsFor('category', { company: els.company.value }));
+    fillSelect(els.docType, optionsFor('doctype', { company: els.company.value, category: els.category.value }));
+    fillSelect(els.detail, optionsFor('detail', { company: els.company.value, category: els.category.value, doctype: els.docType.value }));
+    var conds = optionsFor('condition', { company: els.company.value, category: els.category.value, doctype: els.docType.value, detail: els.detail.value });
+    fillSelect(els.condition, conds.length ? conds : ['']);
+  }
+
+  function refreshFromCompany() { fillSelect(els.category, optionsFor('category', { company: els.company.value })); refreshFromCategory(); }
+  function refreshFromCategory() { fillSelect(els.docType, optionsFor('doctype', { company: els.company.value, category: els.category.value })); refreshFromDocType(); }
+  function refreshFromDocType() { fillSelect(els.detail, optionsFor('detail', { company: els.company.value, category: els.category.value, doctype: els.docType.value })); refreshFromDetail(); }
+  function refreshFromDetail() {
+    var conds = optionsFor('condition', { company: els.company.value, category: els.category.value, doctype: els.docType.value, detail: els.detail.value });
+    fillSelect(els.condition, conds.length ? conds : ['']);
+  }
+
+  function currentRule() {
+    var ruleset = rulesetOf(els.company.value);
+    return rules.find(function (r) {
+      return r.company === ruleset &&
+        r.category === els.category.value &&
+        r.doctype === els.docType.value &&
+        (r.detail || '') === (els.detail.value || '') &&
+        (r.condition || '') === (els.condition.value || '');
+    });
+  }
+
+  function stepClass(kind) {
+    if (kind === '결재') return 'appr';
+    if (kind === '보고') return 'report';
+    return 'agree';
+  }
+
+  function renderSteps(rule) {
+    var steps = rule.steps || [];
+    var maxN = steps.length ? steps[steps.length - 1].n : 0;
+    var html = '';
+    steps.forEach(function (s, i) {
+      var isFinal = (s.kind === '결재' && s.n === maxN) || (s.kind === '결재' && s.role === rule.final);
+      html += '<div class="step-box ' + stepClass(s.kind) + (isFinal ? ' final' : '') + '">' +
+        '<div class="num">STEP ' + s.n + '</div>' +
+        '<div class="role">' + esc(s.role) + '</div>' +
+        '<div class="kind">' + esc(s.kind) + '</div></div>';
+      if (i < steps.length - 1) html += '<span class="step-arrow">→</span>';
+    });
+    els.stepsStrip.innerHTML = html || '<span style="color:var(--muted);font-size:14px;">진행순서 정보 없음</span>';
+  }
+
+  function renderRule(rule) {
+    if (!rule) {
+      els.resultEyebrow.textContent = '조건을 선택해 주세요';
+      els.resultTitle.textContent = '조회 결과';
+      els.stepsStrip.innerHTML = '<span style="color:var(--muted);font-size:14px;">조건을 선택하면 전체 진행 순서가 여기에 표시됩니다.</span>';
+      els.finalApproverName.textContent = '-';
+      els.meta.innerHTML = '';
+      els.warningBox.style.display = 'none';
+      return;
+    }
+    var displayCompany = els.company.value;
+    var pathParts = [rule.detail, rule.condition].filter(Boolean);
+    els.resultEyebrow.textContent = displayCompany + ' · ' + rule.category;
+    els.resultTitle.textContent = rule.doctype;
+    els.finalApproverName.textContent = rule.final || '-';
+    renderSteps(rule);
+    els.meta.innerHTML =
+      row('회사', displayCompany) +
+      row('대분류', rule.category) +
+      row('문서유형', rule.doctype) +
+      row('세부내용', pathParts.join(' · ') || '없음') +
+      row('합의라인', rule.agreeline || '없음') +
+      row('수신참조', rule.cc || '없음') +
+      row('집행/반출부서', rule.dept || '없음');
+
+    if (rule.notice) {
+      els.warningBox.style.display = 'block';
+      els.warningBox.textContent = '주의사항: ' + rule.notice;
+    } else {
+      els.warningBox.style.display = 'none';
+      els.warningBox.textContent = '';
+    }
+  }
+
+  function row(k, v) {
+    return '<div class="row"><div class="key">' + esc(k) + '</div><div class="val">' + esc(v) + '</div></div>';
+  }
+
+  function ruleKey(r) { return r.company + '|' + r.category + '|' + r.doctype + '|' + (r.detail || '') + '|' + (r.condition || ''); }
+
+  function highlightActive(rule) {
+    var key = rule ? ruleKey(rule) : null;
+    document.querySelectorAll('.item').forEach(function (el) {
+      el.classList.toggle('active', el.dataset.key === key);
+    });
+  }
+
+  function applyRule(rule, displayCompany) {
+    if (!rule) return;
+    els.company.value = displayCompany || els.company.value; refreshFromCompany();
+    els.category.value = rule.category; refreshFromCategory();
+    els.docType.value = rule.doctype; refreshFromDocType();
+    els.detail.value = rule.detail || ''; refreshFromDetail();
+    els.condition.value = rule.condition || '';
+    renderRule(rule);
+    highlightActive(rule);
+  }
+
+  function docColor(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); hash |= 0; }
+    var hue = Math.abs(hash) % 360;
+    return { bg: 'hsl(' + hue + ',70%,93%)', border: 'hsl(' + hue + ',55%,68%)', text: 'hsl(' + hue + ',60%,26%)' };
+  }
+
+  function openDropdown() { els.resultList.classList.add('open'); }
+  function closeDropdown() { els.resultList.classList.remove('open', 'has-overflow'); }
+
+  function updateScrollHint() {
+    var el = els.resultList;
+    var overflowing = el.scrollHeight > el.clientHeight + 4;
+    el.classList.toggle('has-overflow', overflowing && el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+    els.scrollHint.classList.toggle('show', overflowing);
+    if (!el.dataset.scrollBound) {
+      el.dataset.scrollBound = '1';
+      el.addEventListener('scroll', function () {
+        var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+        el.classList.toggle('has-overflow', !atBottom);
+      });
+    }
+  }
+
+  function renderEmptyState() {
+    els.resultList.innerHTML = '<div style="padding:16px 8px;text-align:center;color:var(--muted);font-size:13.5px;font-weight:700;">일치하는 항목이 없습니다.</div>';
+    els.scrollHint.classList.remove('show');
+  }
+
+  function renderList(list) {
+    var displayCompany = els.company.value;
+    els.resultList.innerHTML = list.slice(0, 150).map(function (r) {
+      var tagParts = [displayCompany, r.category].filter(Boolean).join(' · ');
+      var detailParts = [r.detail, r.condition].filter(Boolean).join(' · ');
+      var col = docColor(r.doctype);
+      return '<div class="item" data-key="' + esc(ruleKey(r)) + '">' +
+        '<div class="item-head">' +
+          '<span class="doctype-badge" style="background:' + col.bg + ';border-color:' + col.border + ';color:' + col.text + '">' + esc(r.doctype) + '</span>' +
+          '<span class="item-company">' + esc(tagParts) + '</span>' +
+        '</div>' +
+        (detailParts ? '<div class="item-detail">' + esc(detailParts) + '</div>' : '') +
+        '<div class="item-approver">최종 결재권자: ' + esc(r.final || '-') + '</div>' +
+        '</div>';
+    }).join('') + '<div class="dropdown-fade"></div>';
+    els.resultList.querySelectorAll('.item').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var rule = list.find(function (r) { return ruleKey(r) === el.dataset.key; });
+        applyRule(rule, displayCompany);
+        closeDropdown();
+      });
+    });
+    var selected = currentRule();
+    if (selected) highlightActive(selected);
+    updateScrollHint();
+  }
+
+  function runSearch() {
+    var q = (els.keyword.value || '').trim().toLowerCase();
+    var ruleset = rulesetOf(els.company.value);
+
+    if (!q) {
+      els.countText.textContent = '';
+      els.scrollHint.classList.remove('show');
+      closeDropdown();
+      return;
+    }
+
+    var list = rules
+      .filter(function (r) { return r.company === ruleset; })
+      .map(function (r) {
+        var hay = [r.category, r.doctype, r.detail, r.condition, r.final, r.agreeline].filter(Boolean).join(' ').toLowerCase();
+        return { r: r, hay: hay };
+      })
+      .filter(function (x) { return x.hay.indexOf(q) !== -1; })
+      .sort(function (a, b) { return a.hay.length - b.hay.length; }) // 더 구체적으로(짧게) 일치하는 항목을 우선 표시
+      .map(function (x) { return x.r; });
+
+    els.countText.textContent = '검색 결과 ' + list.length + '건';
+    if (list.length > 0) {
+      renderList(list);
+      applyRule(list[0], els.company.value); // 검색 즉시 가장 유력한 항목을 조건 선택 및 결재라인에 자동 반영
+    } else {
+      renderEmptyState();
+    }
+    openDropdown();
+  }
+
+  fillSelect(els.company, COMPANY_OPTIONS);
+  resetCascade('인라이플');
+  renderRule(currentRule());
+
+  els.company.addEventListener('change', function () { refreshFromCompany(); renderRule(currentRule()); runSearch(); });
+  els.category.addEventListener('change', function () { refreshFromCategory(); renderRule(currentRule()); });
+  els.docType.addEventListener('change', function () { refreshFromDocType(); renderRule(currentRule()); });
+  els.detail.addEventListener('change', function () { refreshFromDetail(); renderRule(currentRule()); });
+  els.condition.addEventListener('change', function () { renderRule(currentRule()); });
+  document.getElementById('findBtn').addEventListener('click', function () { renderRule(currentRule()); });
+  document.getElementById('resetBtn').addEventListener('click', function () { els.keyword.value = ''; resetCascade('인라이플'); renderRule(currentRule()); closeDropdown(); els.countText.textContent = ''; });
+  document.getElementById('searchBtn').addEventListener('click', runSearch);
+  els.keyword.addEventListener('keydown', function (e) { if (e.key === 'Enter') { runSearch(); } else if (e.key === 'Escape') { closeDropdown(); els.keyword.blur(); } });
+  els.keyword.addEventListener('input', runSearch); // 입력하는 즉시 자동으로 조건/결재라인이 반영되고 드롭다운이 펼쳐짐
+  els.keyword.addEventListener('focus', function () { if (els.keyword.value.trim()) runSearch(); });
+  document.addEventListener('mousedown', function (e) { if (!els.searchWrap.contains(e.target)) closeDropdown(); });
+})();
+</script>
+</body>
+</html>

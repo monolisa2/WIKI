@@ -371,7 +371,7 @@ function LiveBlockDialog({ onClose, onInsert }: { onClose: () => void; onInsert:
             ) : (
               <button
                 type="button"
-                onClick={() => onInsert(liveTokenText(k, k === "ninehire-tabs" ? DEFAULT_TAB_PAGES.join(",") : null))}
+                onClick={() => onInsert(liveTokenText(k, k === "ninehire-tabs" ? DEFAULT_TAB_PAGES.join(",") : k === "embed" ? "approval-kiosk" : null))}
                 className="flex w-full items-center gap-3 rounded-[10px] border border-hairline px-3 py-2 text-left hover:bg-accent-soft"
               >
                 <span aria-hidden>🔄</span>

@@ -22,6 +22,8 @@
 | 브랜드 | CI 그린 `#7FBF31`, CI 블랙 `#040000`. 로고 SVG 컴포넌트, 파비콘, `public/enliple-logo.svg` | `src/components/Logo.tsx`, `src/app/icon.svg`, `globals.css` 토큰 |
 | **연동 블록** | 본문에 `[[live:ninehire-letter]]` · `[[live:ninehire-news]]` · `[[live:ninehire-positions]]` · `[[live:ninehire-page:culture|mobon|mobi|mobsoft|mobwith|anick|process|home]]` · `[[live:ninehire-tabs:mobon,mobi,mobwith,mobsoft,anick]]`(탭) 한 줄을 쓰면 문서 화면에서 채용 사이트(enliple.ninehire.site) 최신 내용이 그 자리에 들어감. 서버 fetch + Next 데이터 캐시 **1시간**(`NINEHIRE_REVALIDATE`). 실패 시 원문 링크가 있는 경고 콜아웃만 표시. 페이지 블록은 나인하이어의 섹션 → 행 → 열 → 블록 구조와 **이미지·글자 크기·정렬을 그대로** 그린다(글만 뽑던 1차 버전은 어색해서 교체). 인라인 HTML 은 strong·em·br 만 남기고 이스케이프. 편집기 툴바 "🔄 연동 블록" 버튼, 미리보기는 칩으로 표시 | `src/lib/live-blocks.ts`(토큰 파서), `src/lib/ninehire.ts`(HTML의 `__NEXT_DATA__` 파싱 + 공개 API), `src/components/doc/LiveBlock.tsx`, `DocBody.tsx` |
 | **연동 블록 렌더러** | 채용 사이트 페이지를 섹션→행→열→블록 구조·이미지·글자 크기·정렬 그대로 그림(`nh-*` CSS). 인라인 HTML 은 `<strong> <em> <br>` 만 남기고 이스케이프. `[[live:ninehire-tabs:a,b,c]]` 는 클라이언트 탭(`LiveTabs.tsx`)으로 페이지 전환. 연동 블록은 `Suspense` 로 감싸 본문이 먼저 뜨고 뒤따라 채워짐 | `src/lib/ninehire.ts`, `src/components/doc/LiveBlock.tsx`, `LiveTabs.tsx`, `DocBody.tsx` |
+| **임베드 블록** | `[[live:embed:approval-kiosk]]` → `public/tools/approval-kiosk.html`(회계팀 배포 HTML, 외부 의존 없음, 108건)을 같은 출처 iframe 으로. `.html` 은 미들웨어 매처에 걸려 로그인 필수. 새 도구는 `EMBEDS` 에 추가 | `src/lib/live-blocks.ts`, `LiveBlock.tsx` |
+| 표 렌더링 | 마크다운 표를 `.table-wrap` 으로 감싸 테두리·배경이 내용 폭만큼만 그려지던(잘린 듯 보이던) 문제 해결 | `Markdown.tsx`, `globals.css` |
 | 미공개 문서 링크 | 본문이 링크한 문서가 현재 사용자에게 보이지 않으면(초안 등) 링크 대신 회색 글자 + "준비 중" 칩. 문서 페이지가 링크된 slug 를 RLS 하에서 조회해 없는 것을 `missingSlugs` 로 넘김 | `src/app/(site)/docs/[slug]/page.tsx`, `src/components/Markdown.tsx` |
 
 ## DB 상태 (사용자가 SQL Editor 에서 실행한 순서)
@@ -35,6 +37,7 @@
 7. **`batch6_update.sql`** — 조직문화 분류(`culture`, 🌿) 신설 + `newsletter`(열일레터, 연동) · `how-we-work`(인라이플 컬처, 연동) · `training-contents`(교육 콘텐츠, 자리만) 신규, `company-overview` · `group-structure` · `referral` 를 안내게시판 톤으로 간결화하고 연동 블록 적용, 인덕스 스텁 15건 본문을 한 줄 + 관련 문서로 정리 — **사용자 실행 필요 (코드 배포 후)**
 8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
 9. `batch7_update.sql` — 계열사 구조의 회사별 소개를 `[[live:ninehire-tabs:…]]` 탭 하나로
+11. **`batch9_update.sql`** — 네이버웍스 공지 반영: `condolence-flowers`(경조화환 발송 기준, 총무팀 2026-07-01), `childcare-tax-exemption`(보육수당 비과세, 인사관리실 2026-07-02), `amaranth-guide`(아마란스10 가이드 ver.1 요약, 스텁 채움), `approval-authority`(위임전결 기준·결재라인, 회계팀 2026-07-01, 조회 도구 임베드), `family-events` 화환 행에 신청 경로·링크 추가. 첨부 5개는 `wiki_attachments_batch9.zip` 을 `/admin/files` 에서 일괄 등록
 10. **`batch8_update.sql`** — 문서 55건 끝의 반복 면책 인용문 제거(푸터에 같은 문구), "확인 중"·"반영할 예정" 운영 메모 12곳을 확정 문장으로. 기념일 축하금 지급 대상은 **공지 기준(입사 1년 이상 정규직)** 으로 적었으니 인사관리실이 규정(3개월)과 어느 쪽이 맞는지 최종 확인
 9. **`batch7_update.sql`** — 계열사 구조 문서의 회사별 소개를 탭 블록 하나로 교체 — **사용자 실행 필요 (탭 코드 배포 후)**
 
@@ -70,6 +73,7 @@
 - 문서 속성 줄에서 값 없는 항목("시행일 —")과 "원본 출처: 위키 자체 문서" 를 숨김. "내용 수집 필요" → "정리 중".
 - 홈 하단 안내 문구를 짧게. 미공개 문서 링크는 "준비 중" 칩.
 - 문서 55건 끝의 반복 면책 인용문 제거(batch8). 운영 메모 문장 12곳 정리(batch8).
+- 네이버웍스 게시글은 사용자가 PDF(인쇄→PDF)·첨부로 넘겨주면 반영한다. 2026-09-07 에 5건 반영(경조화환·보육수당·아마란스 가이드·위임전결·[회계팀] 아마란스 안내 일부). **[회계팀] Amaranth 10 그룹웨어 가이드 안내** 게시글은 스크린샷이 "근태 유의사항" 중간에서 잘려 뒷부분과 첨부 2개(인사관리실_아마란스10_가이드는 받음, **[재무관리실] 더존 아마란스10 가이드 vff.pdf 는 미수령**)가 남았다. 텍스트 추출은 `pymupdf`(pip) 로.
 - 아직 남은 것: (1) 온보딩 13건 공개 여부 결정(`publish_onboarding.sql`) (2) 스텁 15건·`training-contents` 등 "정리 중" 문서 채우기 (3) 네이버웍스 게시글 5건과 이미지형 안내(포스터·제도표)는 사용자가 PDF/스크린샷으로 넘겨줘야 반영 가능 (4) 규정 전문(rule) 38건은 그대로 두되, 안내 문서에서 조문 링크만 유지.
 
 ## 절대 지킬 것

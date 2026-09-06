@@ -40,6 +40,12 @@ export function Markdown({
         remarkPlugins={[remarkGfm, remarkCallouts]}
         rehypePlugins={[rehypeSlug]}
         components={{
+          // 표는 스크롤 상자로 감싼다. table 자체를 display:block 으로 두면 배경·테두리가 내용 폭만큼만 그려져 잘린 것처럼 보인다.
+          table: ({ children: c }) => (
+            <div className="table-wrap">
+              <table>{c}</table>
+            </div>
+          ),
           a: ({ href, children: c }) => {
             const m = href ? DOC_LINK.exec(href) : null;
             if (m && missing.has(decodeURIComponent(m[1]))) {

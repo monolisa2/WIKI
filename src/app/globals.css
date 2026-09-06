@@ -299,7 +299,9 @@ body {
   font-size: 0.9em;
 }
 .prose-wiki pre code { background: none; padding: 0; color: inherit; }
-.prose-wiki table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.92em; display: block; overflow-x: auto; border: 1px solid var(--hairline); border-radius: 12px; }
+.prose-wiki .table-wrap { margin: 1.2em 0; overflow-x: auto; border: 1px solid var(--hairline); border-radius: 12px; }
+.prose-wiki table { width: 100%; border-collapse: collapse; margin: 0; font-size: 0.92em; }
+.prose-wiki .table-wrap table tr:last-child td { border-bottom: 0; }
 .prose-wiki th, .prose-wiki td { border-bottom: 1px solid var(--hairline); padding: 0.6em 0.85em; text-align: left; vertical-align: top; min-width: 6em; }
 .prose-wiki th { font-weight: 700; color: var(--text); background: var(--brand-soft); font-size: 0.92em; white-space: nowrap; }
 .prose-wiki tbody tr:nth-child(even) td { background: var(--surface-2); }

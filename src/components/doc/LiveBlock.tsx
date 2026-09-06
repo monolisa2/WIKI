@@ -1,4 +1,4 @@
-import { liveLabel, pageShortLabel, tabPages, type LiveKind } from "@/lib/live-blocks";
+import { EMBEDS, liveLabel, pageShortLabel, tabPages, type EmbedKey, type LiveKind } from "@/lib/live-blocks";
 import { LiveTabs } from "@/components/doc/LiveTabs";
 import { getNinehireLetters, getNinehireNews, getNinehirePage, getNinehirePositions, ninehirePageUrl, NINEHIRE_SITE, type NhBlock, type NhPara } from "@/lib/ninehire";
 
@@ -18,6 +18,8 @@ export async function LiveBlock({ kind, arg }: { kind: LiveKind; arg: string | n
       return <Page page={arg ?? ""} />;
     case "ninehire-tabs":
       return <Tabs arg={arg} />;
+    case "embed":
+      return <Embed id={arg ?? ""} />;
   }
 }
 
@@ -260,4 +262,33 @@ function Block({ block }: { block: NhBlock }) {
         </ul>
       );
   }
+}
+
+/** 위키가 직접 서빙하는 도구 페이지를 iframe 으로. 같은 출처라 로그인 세션이 그대로 적용된다. */
+function Embed({ id }: { id: string }) {
+  if (!(id in EMBEDS)) {
+    return (
+      <aside className="callout callout-warning my-6" data-emoji="⚠️" role="note">
+        <p>끼워 넣을 도구를 찾을 수 없습니다: {id || "(미지정)"}</p>
+      </aside>
+    );
+  }
+  const e = EMBEDS[id as EmbedKey];
+  return (
+    <section className="live-block my-6" data-live={e.title}>
+      <iframe
+        src={e.src}
+        title={e.title}
+        loading="lazy"
+        className="block w-full rounded-[16px] border border-hairline bg-surface"
+        style={{ height: e.height }}
+      />
+      <p className="mt-2 flex flex-wrap items-center gap-x-2 text-[12px] text-ink-3">
+        <span>화면이 좁으면</span>
+        <a href={e.src} target="_blank" rel="noreferrer" className="text-ink-2 underline underline-offset-2 hover:text-ink">
+          새 창에서 열기 ↗
+        </a>
+      </p>
+    </section>
+  );
 }

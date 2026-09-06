@@ -3,6 +3,8 @@ import { Markdown } from "@/components/Markdown";
 import { TypeBadge } from "@/components/TypeBadge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DocToc } from "@/components/DocToc";
+import { AttachmentList } from "@/components/doc/AttachmentList";
+import type { Attachment } from "@/lib/files";
 import { DEFAULT_CATEGORY_ICON, docIcon } from "@/lib/constants";
 import { scopeLabel, sourceLabel } from "@/lib/labels";
 import { formatDate, formatDateTime, isStale } from "@/lib/format";
@@ -19,11 +21,13 @@ export type DocViewRevision = { version: number; change_note: string | null; rev
 export function DocView({
   doc,
   revisions,
+  attachments = [],
   feedback,
   feedbackAction,
 }: {
   doc: DocViewDocument;
   revisions: DocViewRevision[];
+  attachments?: Attachment[];
   feedback?: string;
   feedbackAction: (formData: FormData) => void | Promise<void>;
 }) {
@@ -92,6 +96,11 @@ export function DocView({
 
         <div className={`mt-9 ${hasToc ? "lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start lg:gap-12" : ""}`}>
           <div className="min-w-0">
+            {attachments.length ? (
+              <div className="mb-8">
+                <AttachmentList attachments={attachments} emphasis={doc.doc_type === "form"} />
+              </div>
+            ) : null}
             {isLink ? (
               <div className="callout callout-note" data-emoji="🔗" role="note">
                 <p>이 문서는 원문 링크로 제공됩니다.</p>

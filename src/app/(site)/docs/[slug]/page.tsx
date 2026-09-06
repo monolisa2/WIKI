@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DocView, type DocViewDocument, type DocViewRevision } from "@/components/doc/DocView";
 import { submitFeedback } from "./actions";
+import type { Attachment } from "@/lib/files";
 
 function decodeSlug(raw: string) {
   try {
@@ -39,11 +40,18 @@ export default async function DocumentPage({
   const { supabase, doc } = await loadDocument(slug);
   if (!doc) notFound();
 
-  const { data: revData } = await supabase
-    .from("document_revisions")
-    .select("version, change_note, revised_at")
-    .eq("document_id", doc.id)
-    .order("version", { ascending: false });
+  const [{ data: revData }, { data: attData }] = await Promise.all([
+    supabase.from("document_revisions").select("version, change_note, revised_at").eq("document_id", doc.id).order("version", { ascending: false }),
+    supabase.from("document_attachments").select("*").eq("document_id", doc.id).order("sort_order").order("created_at"),
+  ]);
 
-  return <DocView doc={doc} revisions={(revData ?? []) as DocViewRevision[]} feedback={feedback} feedbackAction={submitFeedback} />;
+  return (
+    <DocView
+      doc={doc}
+      revisions={(revData ?? []) as DocViewRevision[]}
+      attachments={(attData ?? []) as Attachment[]}
+      feedback={feedback}
+      feedbackAction={submitFeedback}
+    />
+  );
 }

@@ -6,6 +6,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { formatDate, formatDateTime } from "@/lib/format";
 import type { Category, Document, DocumentInput } from "@/lib/types";
+import { AttachmentManager } from "@/components/admin/AttachmentManager";
+import type { Attachment } from "@/lib/files";
 import { deleteDocument, publishDocument, setDocumentStatus } from "../actions";
 
 type Params = { id: string };
@@ -39,11 +41,13 @@ export default async function EditDocumentPage({ params, searchParams }: { param
   if (!UUID.test(id)) notFound();
 
   const supabase = await createClient();
-  const [{ data: docData }, { data: catData }, { data: latestRev }] = await Promise.all([
+  const [{ data: docData }, { data: catData }, { data: latestRev }, { data: attData }] = await Promise.all([
     supabase.from("documents").select("*").eq("id", id).maybeSingle(),
     supabase.from("categories").select("*").order("sort_order"),
     supabase.from("document_revisions").select("version, revised_at, change_note").eq("document_id", id).order("version", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("document_attachments").select("*").eq("document_id", id).order("sort_order").order("created_at"),
   ]);
+  const attachments = (attData ?? []) as Attachment[];
 
   if (!docData) notFound();
   const doc = docData as Document;
@@ -132,6 +136,10 @@ export default async function EditDocumentPage({ params, searchParams }: { param
           발행은 <strong>저장된</strong> 내용을 기준으로 합니다. 아래 폼을 수정했다면 먼저 저장해주세요.
         </p>
       </form>
+
+      <div className="mt-6">
+        <AttachmentManager documentId={doc.id} initial={attachments} />
+      </div>
 
       <div className="mt-6">
         <DocumentForm categories={categories} docId={doc.id} initial={toInput(doc)} />

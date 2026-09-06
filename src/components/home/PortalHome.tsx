@@ -22,7 +22,8 @@ export type PortalDoc = {
  * 분류별로 "이모지 + 제목" 한 줄 링크를 촘촘히 깔아 한 화면에서 전체 문서를 훑을 수 있게 한다.
  * 데이터를 받지 않는 표현 컴포넌트라 미리보기·테스트에서 그대로 쓸 수 있다.
  */
-export function PortalHome({ categories, docs }: { categories: Category[]; docs: PortalDoc[] }) {
+export function PortalHome({ categories, docs, attached = [] }: { categories: Category[]; docs: PortalDoc[]; attached?: string[] }) {
+  const hasFile = new Set(attached);
   const byCategory = new Map<number, PortalDoc[]>();
   for (const d of docs) {
     const list = byCategory.get(d.category_id) ?? [];
@@ -87,6 +88,11 @@ export function PortalHome({ categories, docs }: { categories: Category[]; docs:
                         <span className="min-w-0 flex-1 truncate text-[15.5px] font-medium text-ink underline decoration-hairline-strong decoration-[1.5px] underline-offset-[5px] transition-colors group-hover:text-accent group-hover:decoration-accent">
                           {d.title}
                         </span>
+                        {hasFile.has(d.id) ? (
+                          <span aria-label="첨부 파일 있음" title="첨부 파일 있음" className="shrink-0 text-[13px] leading-none text-ink-3">
+                            📎
+                          </span>
+                        ) : null}
                         {d.is_pinned ? (
                           <span aria-label="고정" className="shrink-0 text-[11px] font-semibold text-accent">
                             필독

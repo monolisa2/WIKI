@@ -7,6 +7,7 @@ const NAV = [
   { href: "/admin", label: "대시보드" },
   { href: "/admin/docs", label: "문서" },
   { href: "/admin/categories", label: "분류" },
+  { href: "/admin/files", label: "첨부 일괄 등록" },
 ];
 
 /** 관리자 화면 가드: profiles.role = 'admin' 만 통과 (DB 는 RLS 로 별도 강제) */

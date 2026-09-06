@@ -160,6 +160,9 @@ export async function deleteDocument(formData: FormData) {
   if (!id) redirect("/admin/docs");
 
   const supabase = await createClient();
+  // 첨부 파일 본체 정리 (메타 행은 on delete cascade)
+  const { data: files } = await supabase.storage.from("attachments").list(id, { limit: 1000 });
+  if (files?.length) await supabase.storage.from("attachments").remove(files.map((f) => `${id}/${f.name}`));
   const { error } = await supabase.from("documents").delete().eq("id", id);
   if (error) backToDoc(id, { error: `삭제에 실패했습니다. (${error.message})` });
 

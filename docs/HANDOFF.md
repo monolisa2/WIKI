@@ -4,7 +4,7 @@
 
 ## 한눈에 보기
 
-- 배포: https://enliple-wiki.vercel.app (Vercel, 브랜치 `claude/file-reading-collaboration-9unii6` = 기본 브랜치, 푸시하면 자동 배포)
+- 배포: https://enliple-wiki.vercel.app (Vercel, 브랜치 `claude/file-reading-collaboration-9unii6` = 기본 브랜치, 푸시하면 자동 배포). **주의**: 세션이 다른 작업 브랜치를 지정받으면 거기 푸시한 것만으로는 배포되지 않는다. 2026-09-06 밤에 그 문제로 연동 블록이 `[[live:…]]` 글자로 보였고, 사용자 승인을 받아 기본 브랜치를 작업 브랜치 커밋으로 fast-forward 했다. 새 세션은 작업이 끝나면 **기본 브랜치 반영 여부를 사용자에게 확인**한다.
 - DB/인증/파일: Supabase 프로젝트 `mxinyppssadpmuyowwdc`. 로그인은 회사 이메일 **코드(OTP)** 방식만 사용 (매직링크 폐기).
 - 관리자: mcshin@enliple.com (인사관리실). 편집 화면 `/admin`.
 - 스택: Next.js 15 App Router · React 19 · Tailwind v4 · Supabase(Postgres+Auth+Storage) · **SUITE 글꼴**(`src/app/fonts/*.woff2`, next/font/local, OFL) · react-markdown + remark-gfm + rehype-slug + 자체 콜아웃 플러그인(`src/lib/remark-callouts.ts`).

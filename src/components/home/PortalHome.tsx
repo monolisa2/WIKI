@@ -67,15 +67,16 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
           const list = byCategory.get(c.id) ?? [];
           return (
             <section key={c.id} id={`cat-${c.slug}`} className="home-cat min-w-0 scroll-mt-24">
-              <h2 className="flex items-center gap-2.5 border-b border-hairline pb-2.5 text-[20px] font-semibold tracking-tight">
-                <span aria-hidden className="text-[22px] leading-none">
+              {/* 분류 제목: 문서 본문의 h2 와 같은 연초록 띠. 목록 사이 경계가 한눈에 보인다 */}
+              <h2 className="flex items-center gap-2.5 rounded-[12px] bg-accent-soft px-3.5 py-2.5 text-[19px] font-semibold tracking-tight">
+                <span aria-hidden className="text-[21px] leading-none">
                   {c.icon?.trim() || DEFAULT_CATEGORY_ICON}
                 </span>
                 <span className="truncate">{c.name}</span>
                 <span className="ml-auto text-[13px] font-normal tabular-nums text-ink-3">{list.length}</span>
               </h2>
               {list.length ? (
-                <ul className="mt-2.5 space-y-px">
+                <ul className="mt-2 space-y-px">
                   {list.map((d) => (
                     <li key={d.id}>
                       <Link

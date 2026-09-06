@@ -1,4 +1,4 @@
-# 인라이플 위키 — 작업 인수인계 (2026-09-06 밤 기준)
+# 인라이플 위키 — 작업 인수인계 (2026-09-07 새벽 기준)
 
 새 세션에서 이 저장소를 이어서 작업할 때 먼저 읽는 문서입니다. 명세는 `docs/enliple-wiki-spec.md`, 배포 절차는 `docs/DEPLOY.md`.
 
@@ -21,6 +21,7 @@
 | 첨부 | 비공개 Storage 버킷 `attachments` + `document_attachments` 테이블, `/api/files/[id]` 2분 서명 URL, 편집 화면 업로드 패널, `/admin/files` 일괄 등록(`slug__파일명.ext`) | `…007_attachments.sql`, `src/components/admin/*`, `src/lib/files.ts` |
 | 브랜드 | CI 그린 `#7FBF31`, CI 블랙 `#040000`. 로고 SVG 컴포넌트, 파비콘, `public/enliple-logo.svg` | `src/components/Logo.tsx`, `src/app/icon.svg`, `globals.css` 토큰 |
 | **연동 블록** | 본문에 `[[live:ninehire-letter]]` · `[[live:ninehire-news]]` · `[[live:ninehire-positions]]` · `[[live:ninehire-page:culture|mobon|mobi|mobsoft|mobwith|anick|process|home]]` · `[[live:ninehire-tabs:mobon,mobi,mobwith,mobsoft,anick]]`(탭) 한 줄을 쓰면 문서 화면에서 채용 사이트(enliple.ninehire.site) 최신 내용이 그 자리에 들어감. 서버 fetch + Next 데이터 캐시 **1시간**(`NINEHIRE_REVALIDATE`). 실패 시 원문 링크가 있는 경고 콜아웃만 표시. 페이지 블록은 나인하이어의 섹션 → 행 → 열 → 블록 구조와 **이미지·글자 크기·정렬을 그대로** 그린다(글만 뽑던 1차 버전은 어색해서 교체). 인라인 HTML 은 strong·em·br 만 남기고 이스케이프. 편집기 툴바 "🔄 연동 블록" 버튼, 미리보기는 칩으로 표시 | `src/lib/live-blocks.ts`(토큰 파서), `src/lib/ninehire.ts`(HTML의 `__NEXT_DATA__` 파싱 + 공개 API), `src/components/doc/LiveBlock.tsx`, `DocBody.tsx` |
+| **연동 블록 렌더러** | 채용 사이트 페이지를 섹션→행→열→블록 구조·이미지·글자 크기·정렬 그대로 그림(`nh-*` CSS). 인라인 HTML 은 `<strong> <em> <br>` 만 남기고 이스케이프. `[[live:ninehire-tabs:a,b,c]]` 는 클라이언트 탭(`LiveTabs.tsx`)으로 페이지 전환. 연동 블록은 `Suspense` 로 감싸 본문이 먼저 뜨고 뒤따라 채워짐 | `src/lib/ninehire.ts`, `src/components/doc/LiveBlock.tsx`, `LiveTabs.tsx`, `DocBody.tsx` |
 | 미공개 문서 링크 | 본문이 링크한 문서가 현재 사용자에게 보이지 않으면(초안 등) 링크 대신 회색 글자 + "준비 중" 칩. 문서 페이지가 링크된 slug 를 RLS 하에서 조회해 없는 것을 `missingSlugs` 로 넘김 | `src/app/(site)/docs/[slug]/page.tsx`, `src/components/Markdown.tsx` |
 
 ## DB 상태 (사용자가 SQL Editor 에서 실행한 순서)
@@ -33,6 +34,8 @@
 6. `batch5_update.sql` (회사 소개·연혁, 계열사 구조 초안, referral 포지션 표) — 7번이 덮어쓰므로 건너뛰어도 됨
 7. **`batch6_update.sql`** — 조직문화 분류(`culture`, 🌿) 신설 + `newsletter`(열일레터, 연동) · `how-we-work`(인라이플 컬처, 연동) · `training-contents`(교육 콘텐츠, 자리만) 신규, `company-overview` · `group-structure` · `referral` 를 안내게시판 톤으로 간결화하고 연동 블록 적용, 인덕스 스텁 15건 본문을 한 줄 + 관련 문서로 정리 — **사용자 실행 필요 (코드 배포 후)**
 8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
+9. `batch7_update.sql` — 계열사 구조의 회사별 소개를 `[[live:ninehire-tabs:…]]` 탭 하나로
+10. **`batch8_update.sql`** — 문서 55건 끝의 반복 면책 인용문 제거(푸터에 같은 문구), "확인 중"·"반영할 예정" 운영 메모 12곳을 확정 문장으로. 기념일 축하금 지급 대상은 **공지 기준(입사 1년 이상 정규직)** 으로 적었으니 인사관리실이 규정(3개월)과 어느 쪽이 맞는지 최종 확인
 9. **`batch7_update.sql`** — 계열사 구조 문서의 회사별 소개를 탭 블록 하나로 교체 — **사용자 실행 필요 (탭 코드 배포 후)**
 
 기대 상태: 7번까지 문서 88 / 공개 73 / "내용 수집 필요" 33, 8번까지 하면 공개 86. 로컬 검증으로 8번까지 적용 시 링크 439개 / 깨진 링크 0 확인함. **7번은 연동 블록을 렌더하는 코드가 배포된 뒤 실행**해야 한다(먼저 실행하면 `[[live:…]]` 글자가 그대로 보임).
@@ -54,13 +57,29 @@
 
 로컬 Postgres 요령(이 원격 환경): `pg_ctlcluster 16 main start` → `sudo -u postgres psql -c "alter user postgres password 'postgres'"` → `validate.sh` 는 `PGPASSWORD=postgres` 로 접속하고, `all_in_one.sql` 에 006_icons 가 이미 포함되어 있어 `regulations.sql` 적용 전에 `search_documents(text,int)` 를 drop 한 뒤 007_attachments 까지 적용한다(사용자 DB 실제 이력과 같은 최종 상태).
 
+## 속도 점검 결과와 남은 과제 (2026-09-07)
+
+한 것: `Markdown` 을 서버 컴포넌트로(react-markdown 이 문서 페이지 JS 에서 빠져 **157KB → 107KB**), 연동 블록 Suspense 스트리밍, `loading.tsx` 골격 화면(홈·문서), `React.cache()` 로 문서 조회(generateMetadata+page)와 나인하이어 HTML 파싱 중복 제거, 레이아웃의 `getUser()`(인증 서버 왕복)를 `getSession()` 으로(미들웨어가 이미 검증), `experimental.staleTimes.dynamic=30`(뒤로가기 즉시), 글꼴 900 굵기 제거(preload 143KB 절약).
+
+남은 과제:
+- **지역**: Vercel 함수는 `iad1`(미국 동부)이고 Supabase 도 이 환경에서 측정한 지연으로 보아 미국 동부로 추정된다(같은 지역이라 함수↔DB 는 빠름). 구성원은 한국이라 요청마다 태평양 왕복(~180ms)이 붙는다. Supabase 프로젝트 지역은 대시보드 Settings > General 에서 확인. 둘 다 서울로 옮기면 체감이 가장 크지만, Supabase 는 지역 변경이 불가해 **새 프로젝트 생성 + 데이터 이전**이 필요하다(별도 작업). Vercel 만 서울(`vercel.json` regions `icn1`)로 옮기면 DB 왕복이 늘어 오히려 느려질 수 있으니 **DB 지역을 확인한 뒤** 결정.
+- 미들웨어 `getUser()` 는 요청마다 인증 서버 왕복 1회. Supabase 의 비대칭 JWT 키(getClaims 로컬 검증)로 바꾸면 없앨 수 있다.
+- 홈은 문서 86건 전체를 매 요청 조회. 문서가 수백 건이 되면 `unstable_cache` + 관리자 발행 시 `revalidateTag` 로 바꾼다.
+
+## 구성원 관점 점검에서 고친 것 (2026-09-07)
+- 문서 속성 줄에서 값 없는 항목("시행일 —")과 "원본 출처: 위키 자체 문서" 를 숨김. "내용 수집 필요" → "정리 중".
+- 홈 하단 안내 문구를 짧게. 미공개 문서 링크는 "준비 중" 칩.
+- 문서 55건 끝의 반복 면책 인용문 제거(batch8). 운영 메모 문장 12곳 정리(batch8).
+- 아직 남은 것: (1) 온보딩 13건 공개 여부 결정(`publish_onboarding.sql`) (2) 스텁 15건·`training-contents` 등 "정리 중" 문서 채우기 (3) 네이버웍스 게시글 5건과 이미지형 안내(포스터·제도표)는 사용자가 PDF/스크린샷으로 넘겨줘야 반영 가능 (4) 규정 전문(rule) 38건은 그대로 두되, 안내 문서에서 조문 링크만 유지.
+
 ## 절대 지킬 것
 
 - Supabase `service_role`/secret 키를 쓰지 않는다. 클라이언트는 anon 키 + RLS 만.
 - 직원 개인정보(취업규칙 개정 동의서 xlsx 의 이름·사번·부서 등)는 위키에 넣지 않는다.
 - 모델 식별자를 커밋 메시지·코드·PR 에 넣지 않는다.
-- 글꼴은 사용자가 준 **SUITE**(OFL) woff2 를 저장소에 번들한다(`src/app/fonts/`, 400·500·600·700·900). 외부 폰트 CDN 은 쓰지 않는다(SUIT GitHub CDN 은 손상된 저장소). Noto Sans KR 패키지는 제거했다.
-- 빌드 후 `BUILD_EXIT` 를 확인한 뒤에만 커밋·푸시한다(과거에 grep 이 종료코드를 가려 깨진 빌드가 올라간 적 있음).
+- 글꼴은 사용자가 준 **SUITE**(OFL) woff2 를 저장소에 번들한다(`src/app/fonts/`, 400·500·600·700. 파일마다 preload 되므로 굵기 추가는 신중히). 외부 폰트 CDN 은 쓰지 않는다(SUIT GitHub CDN 은 손상된 저장소). Noto Sans KR 패키지는 제거했다.
+- 빌드 후 `BUILD_EXIT` 를 확인한 뒤에만 커밋·푸시한다(과거에 grep 이 종료코드를 가려 깨진 빌드가 올라간 적 있음). `Markdown.tsx` 에 `"use client"` 를 다시 넣지 않는다(문서 페이지 JS 가 50KB 늘어난다).
+- 문서 본문 톤: 안내게시판. "확인 중", "반영할 예정", 출처·표기 메모는 본문에 쓰지 않고 HANDOFF 에만 적는다. `gen_seed.py` 의 FOOT 는 비워 두었다.
 - 사용자에게 다음에 할 일을 항상 즉시 알려준다. SQL 은 파일로 준다.
 
 ## 사용자(인사관리실) 쪽 미결 사항

@@ -45,7 +45,7 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
         <span>/</span>
         <span>개정 이력</span>
       </div>
-      <h1 className="mt-1 text-xl font-black tracking-tight">개정 이력</h1>
+      <h1 className="mt-1 text-xl font-bold tracking-tight">개정 이력</h1>
 
       {revisions.length === 0 ? (
         <p className="card mt-6 p-8 text-center text-sm text-ink-2">
@@ -79,7 +79,7 @@ export default async function RevisionsPage({ params, searchParams }: { params: 
             <div className="card p-6">
               <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-hairline">
                 <div>
-                  <h2 className="font-black">
+                  <h2 className="font-bold">
                     v{selected.version} · {selected.title}
                   </h2>
                   <p className="text-xs text-ink-2 mt-0.5">{selected.summary}</p>

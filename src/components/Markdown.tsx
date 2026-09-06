@@ -1,5 +1,3 @@
-"use client";
-
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -9,7 +7,7 @@ import { liveLabel, splitLiveBlocks } from "@/lib/live-blocks";
 const DOC_LINK = /^\/docs\/([^#?/]+)/;
 
 /**
- * 마크다운 렌더러 (클라이언트).
+ * 마크다운 렌더러. 서버 컴포넌트에서 그대로 쓰고(문서 화면: 클라이언트 JS 없음), 편집기 미리보기에서는 클라이언트로 번들된다.
  * - `[[live:…]]` 줄은 여기서는 자리표시 칩으로만 보인다 (실제 내용은 서버의 DocBody 가 그린다). 편집기 미리보기용.
  * - missingSlugs: 아직 공개되지 않은 문서 slug. 그 문서로 가는 링크는 "준비 중" 표시로 바꾼다.
  * - bare: 바깥에서 prose-wiki 를 이미 씌운 경우 (DocBody).

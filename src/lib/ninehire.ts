@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { NINEHIRE_PAGES } from "./live-blocks";
 
 /**
@@ -177,13 +178,14 @@ async function fetchHtml(url: string) {
   return res.text();
 }
 
-async function fetchHomepagePages(): Promise<RawPage[]> {
+// 한 요청 안에서 탭 5개가 같은 HTML 을 다시 파싱하지 않도록 요청 단위로 메모이즈
+const fetchHomepagePages = cache(async (): Promise<RawPage[]> => {
   const html = await fetchHtml(`${NINEHIRE_SITE}/`);
   const m = /<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/.exec(html);
   if (!m) throw new Error("ninehire: __NEXT_DATA__ 없음");
   const data = JSON.parse(m[1]) as { props?: { pageProps?: { homepageProps?: { homepage?: { pages?: RawPage[] } } } } };
   return data.props?.pageProps?.homepageProps?.homepage?.pages ?? [];
-}
+});
 
 /** 문서에서 직접 고를 수 있는 페이지 + 목록 블록이 내부적으로 읽는 페이지 */
 const READABLE_PAGES = new Set<string>([...Object.keys(NINEHIRE_PAGES), "letter", "news"]);

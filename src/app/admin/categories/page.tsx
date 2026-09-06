@@ -23,7 +23,7 @@ export default async function CategoriesPage({
 
   return (
     <div>
-      <h1 className="text-xl font-black tracking-tight">분류 관리</h1>
+      <h1 className="text-xl font-bold tracking-tight">분류 관리</h1>
       <p className="mt-1 text-sm text-ink-2">임직원 화면 좌측 레일의 순서와 설명을 관리합니다.</p>
 
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}

@@ -66,7 +66,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
     <div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black tracking-tight">문서</h1>
+          <h1 className="text-xl font-bold tracking-tight">문서</h1>
           <p className="mt-1 text-sm text-ink-2">{rows.length}건</p>
         </div>
         <Link href={`/admin/docs/new${selectedCategory ? `?category=${selectedCategory.slug}` : ""}`} className="btn-primary">

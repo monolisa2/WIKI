@@ -65,7 +65,7 @@ export default async function EditDocumentPage({ params, searchParams }: { param
             <span>/</span>
             <span className="font-mono">{doc.slug}</span>
           </div>
-          <h1 className="mt-1 text-xl font-black tracking-tight truncate">{doc.title}</h1>
+          <h1 className="mt-1 text-xl font-bold tracking-tight truncate">{doc.title}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-2">
             <StatusBadge status={doc.status} />
             {rev ? (

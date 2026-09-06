@@ -14,7 +14,7 @@ export default async function NewDocumentPage({ searchParams }: { searchParams: 
 
   return (
     <div>
-      <h1 className="text-xl font-black tracking-tight">새 문서</h1>
+      <h1 className="text-xl font-bold tracking-tight">새 문서</h1>
       <div className="mt-6">
         <DocumentForm categories={categories} initial={{ ...EMPTY_INPUT, category_id: preset ? String(preset.id) : "" }} />
       </div>

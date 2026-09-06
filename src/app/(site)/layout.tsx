@@ -15,9 +15,12 @@ type SuggestionRow = {
 /** 임직원 화면 공통 레이아웃: glass 헤더 + 통합 검색 */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
+  // middleware(updateSession) 가 이 요청에서 이미 getUser() 로 토큰을 검증했다.
+  // 여기서는 표시용 이름만 필요하므로 네트워크 호출 없이 쿠키의 세션을 읽는다 (요청당 인증 서버 왕복 1회 절약).
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const [{ data: profile }, { data: suggestionRows }] = await Promise.all([
     user ? supabase.from("profiles").select("role, name").eq("id", user.id).maybeSingle() : Promise.resolve({ data: null }),

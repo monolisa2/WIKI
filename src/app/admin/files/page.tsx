@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "첨부 일괄 등록" };
 export default function BulkFilesPage() {
   return (
     <div>
-      <h1 className="text-xl font-black tracking-tight">첨부 일괄 등록</h1>
+      <h1 className="text-xl font-bold tracking-tight">첨부 일괄 등록</h1>
       <p className="mt-1 text-sm text-ink-2">양식·규정 원문 파일을 여러 문서에 한 번에 붙입니다. 문서 하나에만 올릴 때는 그 문서의 편집 화면에서 올리면 됩니다.</p>
       <div className="mt-6">
         <BulkAttachmentImport />

@@ -31,3 +31,5 @@ supabase/seed/batch4_update.sql
 supabase/seed/batch5_update.sql
 supabase/seed/batch6_update.sql
 supabase/seed/batch7_update.sql
+supabase/seed/batch7_update.sql
+supabase/seed/batch8_update.sql

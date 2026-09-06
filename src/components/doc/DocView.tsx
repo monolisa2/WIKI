@@ -72,20 +72,22 @@ export function DocView({
             <p className="mt-4 max-w-3xl border-l-[3px] border-hairline-strong pl-4 text-[16px] leading-[1.8] text-ink-2 sm:text-[17px]">{doc.summary}</p>
           ) : null}
 
-          <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-hairline py-4 text-[14px] sm:grid-cols-4">
+          {/* 값이 있는 항목만 보여준다. 빈 "—" 칸은 구성원에게 정보가 아니다. */}
+          <dl className="mt-7 flex flex-wrap gap-x-8 gap-y-3 border-y border-hairline py-4 text-[14px]">
             <Meta label="적용 범위">{scopeLabel(doc.scope)}</Meta>
-            <Meta label="담당 부서">{doc.owner_team || "—"}</Meta>
-            <Meta label="시행일">{formatDate(doc.effective_date) || "—"}</Meta>
+            {doc.owner_team ? <Meta label="담당 부서">{doc.owner_team}</Meta> : null}
+            {doc.effective_date ? <Meta label="시행일">{formatDate(doc.effective_date)}</Meta> : null}
             <Meta label="최종 개정일">
               {doc.revised_date ? (
                 <span className={isStale(doc.revised_date) ? "text-warn" : undefined}>{formatDate(doc.revised_date)}</span>
               ) : (
-                <span className="badge bg-warn-soft text-warn">내용 수집 필요</span>
+                <span className="badge bg-warn-soft text-warn">정리 중</span>
               )}
             </Meta>
           </dl>
 
-          {source || doc.source_url ? (
+          {/* "위키 자체 문서" 는 출처 표시가 의미 없으므로 외부 원문이 있을 때만 */}
+          {doc.source_url || (source && doc.source_system !== "wiki") ? (
             <div className="mt-4 flex flex-wrap items-center gap-3 text-[13px] text-ink-2">
               <span>원본 출처: {source ?? "—"}</span>
               {doc.source_url ? (
@@ -120,8 +122,8 @@ export function DocView({
             ) : doc.body_md ? (
               <DocBody bodyMd={doc.body_md} missingSlugs={missingSlugs} />
             ) : (
-              <div className="callout callout-plain" data-emoji="🟠" role="note">
-                <p>본문이 아직 등록되지 않았습니다. 제목과 위치만 먼저 등록한 문서입니다.</p>
+              <div className="callout callout-plain" data-emoji="📝" role="note">
+                <p>정리 중인 안내입니다. 확정되는 대로 이 자리에 채워집니다.</p>
               </div>
             )}
 

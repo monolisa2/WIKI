@@ -49,7 +49,7 @@ export default async function AdminDashboard() {
   return (
     <div>
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-black tracking-tight">대시보드</h1>
+        <h1 className="text-xl font-bold tracking-tight">대시보드</h1>
         <Link href="/admin/docs/new" className="btn-primary">
           + 새 문서
         </Link>
@@ -60,7 +60,7 @@ export default async function AdminDashboard() {
           <li key={t.label}>
             <Link href={t.href} className="card block p-4 hover:border-hairline-strong transition-colors">
               <p className="text-xs font-semibold text-ink-2">{t.label}</p>
-              <p className="mt-1 text-2xl font-black tabular-nums">{t.value}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums">{t.value}</p>
             </Link>
           </li>
         ))}

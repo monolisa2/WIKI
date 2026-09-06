@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DocView, type DocViewDocument, type DocViewRevision } from "@/components/doc/DocView";
@@ -21,11 +22,12 @@ function decodeSlug(raw: string) {
   }
 }
 
-async function loadDocument(slug: string) {
+// generateMetadata 와 페이지가 같은 요청에서 한 번만 조회하도록 메모이즈
+const loadDocument = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data } = await supabase.from("documents").select("*, categories(slug, name, icon)").eq("slug", slug).maybeSingle();
   return { supabase, doc: (data as DocViewDocument | null) ?? null };
-}
+});
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

@@ -99,7 +99,7 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
                           </span>
                         ) : null}
                         {!d.revised_date ? (
-                          <span aria-label="내용 수집 필요" title="내용 수집 필요" className="h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
+                          <span aria-label="정리 중" title="정리 중" className="h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
                         ) : null}
                       </Link>
                     </li>
@@ -125,8 +125,8 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
           </aside>
           <aside className="callout callout-plain my-0!" data-emoji="🟠" role="note">
             <p>
-              제목 옆 <span aria-hidden className="mx-0.5 inline-block h-1.5 w-1.5 rounded-full bg-warn align-middle" /> 표시는 아직 <strong>내용을 수집 중</strong>인
-              문서입니다{pending ? ` (${pending}건)` : ""}. 제목과 위치만 먼저 등록했고, 문서 아래 제보 칸으로 알려주시면 빨리 채웁니다.
+              제목 옆 <span aria-hidden className="mx-0.5 inline-block h-1.5 w-1.5 rounded-full bg-warn align-middle" /> 표시는 아직 <strong>정리 중</strong>인
+              문서입니다{pending ? ` (${pending}건)` : ""}. 확정되는 대로 채워지고, 급한 내용은 인사관리실에 문의해주세요.
             </p>
           </aside>
         </div>

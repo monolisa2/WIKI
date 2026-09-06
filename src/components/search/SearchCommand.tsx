@@ -249,7 +249,8 @@ function SearchDialog({
     };
   }, [term, result, suggestions]);
 
-  const items = useMemo(() => [...catItems, ...docItems], [catItems, docItems]);
+  // 문서를 먼저, 분류는 뒤에: Enter 로 가장 잘 맞는 문서가 바로 열리도록
+  const items = useMemo(() => [...docItems, ...catItems], [catItems, docItems]);
 
   useEffect(() => {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`);
@@ -329,13 +330,13 @@ function SearchDialog({
           ) : null}
 
           {!term && docItems.length ? <GroupLabel>추천 문서</GroupLabel> : null}
-          {catItems.length ? <GroupLabel>분류</GroupLabel> : null}
-          {catItems.map((it, i) => (
+          {term && docItems.length ? <GroupLabel>문서 · {docItems.length}</GroupLabel> : null}
+          {docItems.map((it, i) => (
             <ResultRow key={it.key} item={it} index={i} active={active === i} onActivate={setActive} onSelect={go} />
           ))}
-          {term && docItems.length ? <GroupLabel>문서 · {docItems.length}</GroupLabel> : null}
-          {docItems.map((it, j) => {
-            const i = catItems.length + j;
+          {catItems.length ? <GroupLabel>분류로 이동</GroupLabel> : null}
+          {catItems.map((it, j) => {
+            const i = docItems.length + j;
             return <ResultRow key={it.key} item={it} index={i} active={active === i} onActivate={setActive} onSelect={go} />;
           })}
         </div>
@@ -389,22 +390,24 @@ function ResultRow({
         e.preventDefault();
         onSelect(item.href);
       }}
-      className={`mx-2 flex items-start gap-3 rounded-[14px] px-3 py-2.5 transition-colors ${active ? "bg-accent-strong text-white" : "text-ink hover:bg-accent-soft"}`}
+      className={`mx-2 flex items-start gap-3 rounded-[14px] px-3 py-2.5 text-ink transition-colors ${
+        active ? "bg-accent-soft ring-1 ring-inset ring-accent-line" : "hover:bg-black/[0.04]"
+      }`}
     >
       <span
         className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] text-[17px] leading-none ${
-          active ? "bg-white/20 text-white" : "bg-accent-soft text-accent"
+          active ? "bg-white text-accent shadow-soft" : "bg-black/[0.04]"
         }`}
       >
         {glyph}
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2">
-          <span className="truncate text-[16px] font-medium">{item.title}</span>
-          {item.meta ? <span className={`shrink-0 text-[12px] ${active ? "text-white/70" : "text-ink-3"}`}>{item.meta}</span> : null}
+          <span className={`truncate text-[16px] ${active ? "font-semibold text-accent" : "font-medium"}`}>{item.title}</span>
+          {item.meta ? <span className="shrink-0 text-[12px] text-ink-3">{item.meta}</span> : null}
         </span>
         {item.subtitle ? (
-          <span className={`hl mt-0.5 block truncate text-[14px] ${active ? "text-white/80" : "text-ink-2"}`}>
+          <span className="hl mt-0.5 block truncate text-[14px] text-ink-2">
             <Highlight text={item.subtitle} />
           </span>
         ) : null}

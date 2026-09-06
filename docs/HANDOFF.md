@@ -37,6 +37,8 @@
 7. **`batch6_update.sql`** — 조직문화 분류(`culture`, 🌿) 신설 + `newsletter`(열일레터, 연동) · `how-we-work`(인라이플 컬처, 연동) · `training-contents`(교육 콘텐츠, 자리만) 신규, `company-overview` · `group-structure` · `referral` 를 안내게시판 톤으로 간결화하고 연동 블록 적용, 인덕스 스텁 15건 본문을 한 줄 + 관련 문서로 정리 — **사용자 실행 필요 (코드 배포 후)**
 8. `publish_onboarding.sql` (선택) — 온보딩 초안 13건 일괄 공개. 아래 "보이지 않는데 링크는 되는 문서" 참고
 9. `batch7_update.sql` — 계열사 구조의 회사별 소개를 `[[live:ninehire-tabs:…]]` 탭 하나로
+12. **`supabase/migrations/20260907000008_search_rank.sql`** — 검색 순위: 규정 전문보다 안내·양식 +0.5, 필독 +0.3 (SQL Editor 에서 실행)
+13. **`batch10_update.sql`** — 주제별 안내 26건의 doc_type 을 rule → guide 로(규정 배지는 규정 전문 14건에만), 규정 전문 아이콘 📘 통일
 11. **`batch9_update.sql`** — 네이버웍스 공지 반영: `condolence-flowers`(경조화환 발송 기준, 총무팀 2026-07-01), `childcare-tax-exemption`(보육수당 비과세, 인사관리실 2026-07-02), `amaranth-guide`(아마란스10 가이드 ver.1 요약, 스텁 채움), `approval-authority`(위임전결 기준·결재라인, 회계팀 2026-07-01, 조회 도구 임베드), `family-events` 화환 행에 신청 경로·링크 추가. 첨부 5개는 `wiki_attachments_batch9.zip` 을 `/admin/files` 에서 일괄 등록
 10. **`batch8_update.sql`** — 문서 55건 끝의 반복 면책 인용문 제거(푸터에 같은 문구), "확인 중"·"반영할 예정" 운영 메모 12곳을 확정 문장으로. 기념일 축하금 지급 대상은 **공지 기준(입사 1년 이상 정규직)** 으로 적었으니 인사관리실이 규정(3개월)과 어느 쪽이 맞는지 최종 확인
 9. **`batch7_update.sql`** — 계열사 구조 문서의 회사별 소개를 탭 블록 하나로 교체 — **사용자 실행 필요 (탭 코드 배포 후)**
@@ -68,6 +70,13 @@
 - **지역**: Vercel 함수는 `iad1`(미국 동부)이고 Supabase 도 이 환경에서 측정한 지연으로 보아 미국 동부로 추정된다(같은 지역이라 함수↔DB 는 빠름). 구성원은 한국이라 요청마다 태평양 왕복(~180ms)이 붙는다. Supabase 프로젝트 지역은 대시보드 Settings > General 에서 확인. 둘 다 서울로 옮기면 체감이 가장 크지만, Supabase 는 지역 변경이 불가해 **새 프로젝트 생성 + 데이터 이전**이 필요하다(별도 작업). Vercel 만 서울(`vercel.json` regions `icn1`)로 옮기면 DB 왕복이 늘어 오히려 느려질 수 있으니 **DB 지역을 확인한 뒤** 결정.
 - 미들웨어 `getUser()` 는 요청마다 인증 서버 왕복 1회. Supabase 의 비대칭 JWT 키(getClaims 로컬 검증)로 바꾸면 없앨 수 있다.
 - 홈은 문서 86건 전체를 매 요청 조회. 문서가 수백 건이 되면 `unstable_cache` + 관리자 발행 시 `revalidateTag` 로 바꾼다.
+
+## 구성원 관점 2차 점검에서 고친 것 (2026-09-07, 실제 화면 스크린샷 기준)
+- 홈: 분류 그리드를 CSS 다단(`.home-columns`)으로 바꿔 문서 수가 다른 분류 사이 빈 공간 제거. 분류 밑 힌트 문구 제거(목록과 중복). 대외비 안내를 한 줄로.
+- 검색: 결과 순서를 문서 → 분류로(Enter 가 가장 잘 맞는 문서를 열도록). 선택 행을 진한 녹색 채움 → 연한 배경+테두리로. 순위 보정 마이그레이션 008.
+- 문서 유형: "경조사"·"연차" 같은 안내가 `rule`(규정 배지 📘)로 등록돼 있어 `guide` 로 정리(batch10). "규정" 배지는 이제 규정 전문에만 붙는다.
+- 모바일: 표가 화면 폭에 눌려 글자가 한 자씩 꺾이던 문제 → 560px 최소 폭 + 가로 스크롤.
+- 미리보기 방법(기록): 로컬 Postgres 에서 `mock2.json`(분류·문서·search_documents 결과)을 뽑아 `zz-preview` 라우트에 먹이고, Playwright `page.route('**/api/search**')` 로 검색 API 를 목 응답으로 대체하면 Supabase 없이 검색 패널까지 스크린샷할 수 있다(`rules/preview/ux_shot.js`).
 
 ## 구성원 관점 점검에서 고친 것 (2026-09-07)
 - 문서 속성 줄에서 값 없는 항목("시행일 —")과 "원본 출처: 위키 자체 문서" 를 숨김. "내용 수집 필요" → "정리 중".

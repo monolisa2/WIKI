@@ -351,3 +351,16 @@ body {
 /* 열 안의 작은 아이콘(복지 카드 등)은 축소 비율 그대로 두면 너무 작아지므로 최소 크기 확보 */
 .nh-cols-3 .nh-img, .nh-cols-4 .nh-img { min-width: 56px; }
 .live-tabs [role="tabpanel"][hidden] { display: none; }
+
+/* 홈 분류 그리드: 다단 배치 (분류 하나가 열 중간에서 끊기지 않게) */
+.home-columns { column-gap: 3rem; }
+@media (min-width: 768px) { .home-columns { columns: 2; } }
+@media (min-width: 1280px) { .home-columns { columns: 3; } }
+.home-cat { break-inside: avoid; page-break-inside: avoid; margin-bottom: 2.75rem; }
+.home-cat:last-child { margin-bottom: 0; }
+
+/* 모바일: 표를 억지로 화면 폭에 맞춰 글자가 한 자씩 꺾이지 않게, 가로 스크롤로 */
+@media (max-width: 639px) {
+  .prose-wiki .table-wrap table { min-width: 560px; }
+  .prose-wiki th, .prose-wiki td { min-width: 5.5em; }
+}

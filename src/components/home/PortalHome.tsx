@@ -61,11 +61,12 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
       </section>
 
       {/* 분류별 링크 그리드 */}
-      <section className="wrap grid gap-x-12 gap-y-12 pb-16 pt-10 md:grid-cols-2 xl:grid-cols-3" aria-label="분류별 문서">
+      {/* CSS 다단(columns): 문서 수가 다른 분류들이 빈칸 없이 촘촘히 채워진다 */}
+      <section className="wrap home-columns pb-16 pt-10" aria-label="분류별 문서">
         {categories.map((c) => {
           const list = byCategory.get(c.id) ?? [];
           return (
-            <section key={c.id} id={`cat-${c.slug}`} className="min-w-0 scroll-mt-24">
+            <section key={c.id} id={`cat-${c.slug}`} className="home-cat min-w-0 scroll-mt-24">
               <h2 className="flex items-center gap-2.5 border-b border-hairline pb-2.5 text-[20px] font-semibold tracking-tight">
                 <span aria-hidden className="text-[22px] leading-none">
                   {c.icon?.trim() || DEFAULT_CATEGORY_ICON}
@@ -108,7 +109,6 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
               ) : (
                 <p className="mt-3 px-2 text-[14px] text-ink-3">준비 중입니다.</p>
               )}
-              {c.hint ? <p className="mt-3 px-2 text-[12.5px] leading-relaxed text-ink-3">{c.hint}</p> : null}
             </section>
           );
         })}

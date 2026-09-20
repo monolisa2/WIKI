@@ -68,7 +68,7 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
           return (
             <section key={c.id} id={`cat-${c.slug}`} className="home-cat min-w-0 scroll-mt-24">
               {/* 분류 제목: 문서 본문의 h2 와 같은 연초록 띠. 목록 사이 경계가 한눈에 보인다 */}
-              <h2 className="flex items-center gap-2.5 rounded-[12px] bg-accent-soft px-3.5 py-2.5 text-[19px] font-semibold tracking-tight">
+              <h2 className="flex items-center gap-2.5 rounded-[10px] bg-accent-soft px-3 py-2 text-[18px] font-semibold tracking-tight">
                 <span aria-hidden className="text-[21px] leading-none">
                   {c.icon?.trim() || DEFAULT_CATEGORY_ICON}
                 </span>
@@ -76,18 +76,18 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
                 <span className="ml-auto text-[13px] font-normal tabular-nums text-ink-3">{list.length}</span>
               </h2>
               {list.length ? (
-                <ul className="mt-2 space-y-px">
+                <ul className="mt-1.5">
                   {list.map((d) => (
                     <li key={d.id}>
                       <Link
                         href={`/docs/${d.slug}`}
                         title={d.summary ?? undefined}
-                        className="group flex items-center gap-2.5 rounded-[10px] px-2 py-[7px] transition-colors hover:bg-accent-soft"
+                        className="group flex items-center gap-2.5 rounded-[8px] px-2 py-[3px] transition-colors hover:bg-accent-soft"
                       >
                         <span aria-hidden className="w-6 shrink-0 text-center text-[17px] leading-none">
                           {docIcon(d.icon, d.doc_type)}
                         </span>
-                        <span className="min-w-0 flex-1 truncate text-[15.5px] font-medium text-ink underline decoration-hairline-strong decoration-[1.5px] underline-offset-[5px] transition-colors group-hover:text-accent group-hover:decoration-accent">
+                        <span className="min-w-0 flex-1 truncate text-[15px] font-medium leading-[1.55] text-ink underline decoration-hairline-strong decoration-[1.5px] underline-offset-[4px] transition-colors group-hover:text-accent group-hover:decoration-accent">
                           {d.title}
                         </span>
                         {hasFile.has(d.id) ? (
@@ -108,7 +108,7 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
                   ))}
                 </ul>
               ) : (
-                <p className="mt-3 px-2 text-[14px] text-ink-3">준비 중입니다.</p>
+                <p className="mt-2 px-2 text-[14px] text-ink-3">준비 중입니다.</p>
               )}
             </section>
           );

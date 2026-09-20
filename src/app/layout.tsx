@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { suite } from "./fonts";
+// Pretendard Variable (OFL, public/fonts/pretendard/). 다이내믹 서브셋: 화면에 쓰인 글자 조각만 받는다.
+import "./pretendard.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={suite.variable}>
+    <html lang="ko">
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

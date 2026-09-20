@@ -7,7 +7,7 @@
 - 배포: https://enliple-wiki.vercel.app (Vercel, 브랜치 `claude/file-reading-collaboration-9unii6` = 기본 브랜치, 푸시하면 자동 배포). **주의**: 세션이 다른 작업 브랜치를 지정받으면 거기 푸시한 것만으로는 배포되지 않는다. 2026-09-06 밤에 그 문제로 연동 블록이 `[[live:…]]` 글자로 보였고, 사용자 승인을 받아 기본 브랜치를 작업 브랜치 커밋으로 fast-forward 했다. 새 세션은 작업이 끝나면 **기본 브랜치 반영 여부를 사용자에게 확인**한다.
 - DB/인증/파일: Supabase 프로젝트 `mxinyppssadpmuyowwdc`. 로그인은 회사 이메일 **코드(OTP)** 방식만 사용 (매직링크 폐기).
 - 관리자: mcshin@enliple.com (인사관리실). 편집 화면 `/admin`.
-- 스택: Next.js 15 App Router · React 19 · Tailwind v4 · Supabase(Postgres+Auth+Storage) · **SUITE 글꼴**(`src/app/fonts/*.woff2`, next/font/local, OFL) · react-markdown + remark-gfm + rehype-slug + 자체 콜아웃 플러그인(`src/lib/remark-callouts.ts`).
+- 스택: Next.js 15 App Router · React 19 · Tailwind v4 · Supabase(Postgres+Auth+Storage) · **Pretendard Variable**(`public/fonts/pretendard/`, 다이내믹 서브셋, OFL) · react-markdown + remark-gfm + rehype-slug + 자체 콜아웃 플러그인(`src/lib/remark-callouts.ts`).
 
 ## 지금까지 만든 것
 
@@ -93,7 +93,7 @@
 - Supabase `service_role`/secret 키를 쓰지 않는다. 클라이언트는 anon 키 + RLS 만.
 - 직원 개인정보(취업규칙 개정 동의서 xlsx 의 이름·사번·부서 등)는 위키에 넣지 않는다.
 - 모델 식별자를 커밋 메시지·코드·PR 에 넣지 않는다.
-- 글꼴은 사용자가 준 **SUITE**(OFL) woff2 를 저장소에 번들한다(`src/app/fonts/`, 400·500·600·700. 파일마다 preload 되므로 굵기 추가는 신중히). 외부 폰트 CDN 은 쓰지 않는다(SUIT GitHub CDN 은 손상된 저장소). Noto Sans KR 패키지는 제거했다.
+- 글꼴은 **Pretendard Variable**(OFL, 2026-09-20 사용자 요청으로 SUITE 에서 교체). `public/fonts/pretendard/` 의 다이내믹 서브셋 92개 + `src/app/pretendard.css`(unicode-range 별 @font-face). 브라우저가 화면에 쓰인 글자 조각만 받으므로 첫 로딩이 가볍다. 외부 폰트 CDN 은 쓰지 않는다. **미들웨어 매처에 woff2·ttf·otf 를 제외**해 두었다(빠지면 폰트 요청이 로그인 페이지로 리다이렉트되어 글꼴이 안 뜬다). 외부 폰트 CDN 은 쓰지 않는다(SUIT GitHub CDN 은 손상된 저장소). Noto Sans KR 패키지는 제거했다.
 - 빌드 후 `BUILD_EXIT` 를 확인한 뒤에만 커밋·푸시한다(과거에 grep 이 종료코드를 가려 깨진 빌드가 올라간 적 있음). `Markdown.tsx` 에 `"use client"` 를 다시 넣지 않는다(문서 페이지 JS 가 50KB 늘어난다).
 - 문서 본문 톤: 안내게시판. "확인 중", "반영할 예정", 출처·표기 메모는 본문에 쓰지 않고 HANDOFF 에만 적는다. `gen_seed.py` 의 FOOT 는 비워 두었다.
 - 사용자에게 다음에 할 일을 항상 즉시 알려준다. SQL 은 파일로 준다.

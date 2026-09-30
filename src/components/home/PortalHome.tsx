@@ -81,6 +81,9 @@ export function PortalHome({ categories, docs, attached = [] }: { categories: Ca
                     <li key={d.id}>
                       <Link
                         href={`/docs/${d.slug}`}
+                        // 한 화면에 링크가 90개 가까이 있어 기본 프리페치를 끈다.
+                        // 켜 두면 홈을 한 번 볼 때 문서 수만큼 서버 요청이 더 나간다 (문서 열기는 어차피 수십 ms).
+                        prefetch={false}
                         title={d.summary ?? undefined}
                         className="group flex items-center gap-2.5 rounded-[8px] px-2 py-[3px] transition-colors hover:bg-accent-soft"
                       >

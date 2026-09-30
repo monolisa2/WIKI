@@ -65,12 +65,29 @@
 
 로컬 Postgres 요령(이 원격 환경): `pg_ctlcluster 16 main start` → `sudo -u postgres psql -c "alter user postgres password 'postgres'"` → `validate.sh` 는 `PGPASSWORD=postgres` 로 접속하고, `all_in_one.sql` 에 006_icons 가 이미 포함되어 있어 `regulations.sql` 적용 전에 `search_documents(text,int)` 를 drop 한 뒤 007_attachments 까지 적용한다(사용자 DB 실제 이력과 같은 최종 상태).
 
+## 버그·속도 점검 (2026-09-30)
+
+검사 방법: `npx tsc --noEmit`(통과) · 순수 로직 단위 테스트 13개(node --experimental-strip-types, 전부 통과) · 프로덕션 빌드 서버 + Playwright 로 홈·문서·검색·로그인·404 를 데스크톱/모바일에서 렌더(콘솔 오류 0, 가로 스크롤 0, XSS 실행 0) · 인증 가드 라우트별 확인 · 배포 사이트 응답 측정. 테스트 스크립트는 도구 zip 의 `qa/`(unit.test.ts, smoke.js, prefetch.js).
+
+고친 것:
+- **홈 프리페치 91건 → 2건**. `<Link>` 기본 프리페치 때문에 홈을 한 번 볼 때마다 문서 수만큼 서버 요청이 더 나갔다(각 요청이 미들웨어의 `getUser()` 인증 왕복을 유발). `PortalHome` 목록과 검색 결과 행에 `prefetch={false}`. 문서 열기는 로컬 기준 30ms 대라 체감 손해가 없다.
+
+확인된 정상 동작:
+- 인증 가드: `/`·`/docs/*`·`/admin/*` → 307 `/login`, `/api/*` → 401, 폰트·정적 파일 → 200, `/tools/*.html` → 로그인 필요.
+- 본문 XSS: 마크다운에 `<script>`·`onerror` 를 넣어도 텍스트로만 표시(react-markdown 기본), 연동 블록의 나인하이어 HTML 도 `<strong> <em> <br>` 만 남기고 이스케이프.
+- 검색: 특수문자(`%_(),`), SQL 주입 문자열, 200자 입력, 공백만 입력 모두 오류 없음(공백은 요청조차 하지 않음).
+- 렌더 시간(로컬, DB·네트워크 제외): 홈 12ms, 규정 전문 36KB 문서 9ms, 로그인 29ms. 서버 렌더는 병목이 아니다.
+
+남은 관찰(고치지 않음):
+- `attachments` 테이블(마이그레이션 001)은 쓰이지 않는다. 실제 첨부는 `document_attachments`(007). RLS 가 켜져 있어 위험은 없고, 정리하려면 별도 판단 필요.
+- 미들웨어의 `getUser()` 는 요청마다 Supabase 인증 왕복 1회. 프리페치를 껐으므로 영향이 크게 줄었지만, 더 줄이려면 비대칭 JWT(getClaims 로컬 검증) 전환.
+
 ## 속도 점검 결과와 남은 과제 (2026-09-07)
 
 한 것: `Markdown` 을 서버 컴포넌트로(react-markdown 이 문서 페이지 JS 에서 빠져 **157KB → 107KB**), 연동 블록 Suspense 스트리밍, `loading.tsx` 골격 화면(홈·문서), `React.cache()` 로 문서 조회(generateMetadata+page)와 나인하이어 HTML 파싱 중복 제거, 레이아웃의 `getUser()`(인증 서버 왕복)를 `getSession()` 으로(미들웨어가 이미 검증), `experimental.staleTimes.dynamic=30`(뒤로가기 즉시), 글꼴 900 굵기 제거(preload 143KB 절약).
 
 남은 과제:
-- **지역**: Supabase 프로젝트는 **서울(ap-northeast-2)** 이다(2026-09-07 사용자 대시보드 스크린샷으로 확인). Vercel 함수는 기본 `iad1`(미국 동부)이어서 DB 왕복마다 태평양을 건너던 것을 `vercel.json` 의 `regions: ["icn1"]` 로 서울에 고정했다(Hobby 플랜도 지역 1개 지정 가능). 이전 세션에서 "Supabase 도 미국 동부로 추정"이라고 적은 것은 컨테이너 프록시 지연을 잘못 읽은 것이니 무시.
+- **지역**(2026-09-30 확인: `x-vercel-id: iad1::icn1::…` 로 함수가 서울에서 실행됨): Supabase 프로젝트는 **서울(ap-northeast-2)** 이다(2026-09-07 사용자 대시보드 스크린샷으로 확인). Vercel 함수는 기본 `iad1`(미국 동부)이어서 DB 왕복마다 태평양을 건너던 것을 `vercel.json` 의 `regions: ["icn1"]` 로 서울에 고정했다(Hobby 플랜도 지역 1개 지정 가능). 이전 세션에서 "Supabase 도 미국 동부로 추정"이라고 적은 것은 컨테이너 프록시 지연을 잘못 읽은 것이니 무시.
 - 미들웨어 `getUser()` 는 요청마다 인증 서버 왕복 1회. Supabase 의 비대칭 JWT 키(getClaims 로컬 검증)로 바꾸면 없앨 수 있다.
 - 홈은 문서 86건 전체를 매 요청 조회. 문서가 수백 건이 되면 `unstable_cache` + 관리자 발행 시 `revalidateTag` 로 바꾼다.
 

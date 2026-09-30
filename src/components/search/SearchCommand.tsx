@@ -383,6 +383,7 @@ function ResultRow({
       aria-selected={active}
       data-index={index}
       href={item.href}
+      prefetch={false}
       onMouseMove={() => {
         if (!active) onActivate(index);
       }}

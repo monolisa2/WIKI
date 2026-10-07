@@ -65,6 +65,21 @@
 
 로컬 Postgres 요령(이 원격 환경): `pg_ctlcluster 16 main start` → `sudo -u postgres psql -c "alter user postgres password 'postgres'"` → `validate.sh` 는 `PGPASSWORD=postgres` 로 접속하고, `all_in_one.sql` 에 006_icons 가 이미 포함되어 있어 `regulations.sql` 적용 전에 `search_documents(text,int)` 를 drop 한 뒤 007_attachments 까지 적용한다(사용자 DB 실제 이력과 같은 최종 상태).
 
+## 사이트 전체 다운 사고와 대응 (2026-10-07, 504 MIDDLEWARE_INVOCATION_TIMEOUT)
+
+증상: 로그인 상태에서 모든 경로가 `504 MIDDLEWARE_INVOCATION_TIMEOUT` (`icn1`). 원인 구간은 `src/lib/supabase/middleware.ts` 의 `supabase.auth.getUser()` 한 줄. 세션 쿠키가 있으면 요청마다 Supabase auth 서버로 네트워크 호출이 나가는데, 여기에 타임아웃이 없어서 auth 응답이 늦어지면 Vercel 미들웨어 예산(25s)을 그대로 소진하고 사이트 전체가 열리지 않았다. 쿠키가 없는 방문자는 네트워크 호출 자체가 없어 영향이 없다(그래서 로그인한 사람만 전멸).
+
+고친 것
+- 미들웨어의 Supabase 호출에 2.5s 타임아웃(`AUTH_TIMEOUT_MS`). 25s 를 기다리다 504 가 되는 경로를 없앴다.
+- auth 서버에 닿지 못한 경우(`AuthRetryableFetchError`, status 0/5xx/429)는 "인증 실패"가 아니라 `authDegraded` 로 구분한다.
+- degraded 상태에서 세션 쿠키가 있는 사람은 그대로 통과시킨다. 데이터는 RLS 로 막히므로 위조 쿠키로는 아무 행도 읽히지 않는다 — 최악이라도 빈 화면이지 유출이 아니다.
+- 페이지·API 쪽 Supabase 클라이언트(`server.ts`)에도 5s 타임아웃을 걸어, Supabase 가 멎었을 때 서버리스 함수가 무한정 매달리지 않게 했다.
+- `AbortSignal.any` 가 없는 런타임에서도 타임아웃만은 걸리도록 폴백을 뒀다.
+
+검증: 응답하지 않는 가짜 auth 서버(127.0.0.1 blackhole)를 띄우고 측정 — 미들웨어는 2.5s 안에 반환(`/api/search` 3.2s 응답), 쿠키 없는 방문자는 `/login` 정상, 고치기 전에는 40s+ 매달린 뒤 타임아웃.
+
+남은 과제: Supabase 가 완전히 멎으면 페이지는 쿼리 5개 × 5s 만큼 느려진다. 요청 단위 공용 deadline 을 두거나, 미들웨어의 `getUser()` 를 로컬 JWT 검증으로 바꾸면(네트워크 왕복 자체가 사라짐) 더 단단해진다.
+
 ## 버그·속도 점검 (2026-09-30)
 
 검사 방법: `npx tsc --noEmit`(통과) · 순수 로직 단위 테스트 13개(node --experimental-strip-types, 전부 통과) · 프로덕션 빌드 서버 + Playwright 로 홈·문서·검색·로그인·404 를 데스크톱/모바일에서 렌더(콘솔 오류 0, 가로 스크롤 0, XSS 실행 0) · 인증 가드 라우트별 확인 · 배포 사이트 응답 측정. 테스트 스크립트는 도구 zip 의 `qa/`(unit.test.ts, smoke.js, prefetch.js).

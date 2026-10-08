@@ -137,8 +137,11 @@ export async function updateSession(request: NextRequest) {
     authDegraded = true;
   }
 
-  // auth 서버 장애 중: 이미 세션 쿠키를 가진 사람은 그대로 통과시킨다.
-  if (authDegraded && session) {
+  // auth 서버 장애 중: 아직 만료되지 않은 세션을 가진 사람은 그대로 통과시킨다.
+  // 이미 만료된 토큰은 통과시켜도 데이터 질의가 RLS 에서 막혀 빈 화면이 되므로,
+  // 차라리 로그인 화면으로 보낸다.
+  const sessionStillValid = session != null && (session.expiresAt == null || session.expiresAt * 1000 > Date.now());
+  if (authDegraded && sessionStillValid) {
     return pathname === "/login" ? homeRedirect() : response;
   }
 

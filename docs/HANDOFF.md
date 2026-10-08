@@ -92,6 +92,16 @@
 
 검증(응답하지 않는 가짜 auth 서버): 토큰이 살아 있으면 15~75ms(네트워크 호출 0회), 만료 임박 + auth 서버 먹통이면 정확히 3.0s 에서 반환, 쿠키 없는 방문자는 영향 없음. 고치기 전에는 이 경로가 25s 를 넘겨 504 가 됐다.
 
+## 속도 작업 (2026-10-08)
+
+- **요청마다 나가던 인증 왕복 제거**: 미들웨어가 토큰 만료 2분 전까지는 Supabase 를 호출하지 않는다(위 504 사고 항목 참고). 모든 페이지에 걸리던 왕복 1회가 사라졌다.
+- **폰트 1년 캐시**: `public/fonts/*` 가 `public, max-age=0, must-revalidate` 로 나가고 있었다. 한 페이지가 서브셋 woff2 를 여러 개 받으므로 재방문마다 그만큼 조건부 요청이 돌았다. `next.config.ts` 의 `headers()` 에서 `max-age=31536000, immutable` 로 바꿨다. **폰트를 교체할 때는 반드시 파일 경로를 바꿔야 한다.**
+- **hover 프리페치**(`src/components/HoverPrefetch.tsx`): 홈에 문서 링크가 90개라 Next 기본 프리페치는 요청 폭탄이 된다. 링크마다 `prefetch={false}` 로 끄면 hover 프리페치까지 같이 꺼지므로(`next/dist/client/app-dir/link.js` 의 `prefetchEnabled`), 마우스를 올리거나 손을 댄 링크 하나만 `router.prefetch` 로 받아오는 위임 리스너를 `(site)` 레이아웃에 달았다. 외부 링크·다운로드·`/api/` 는 제외, 한 화면당 60개 상한. 실제 브라우저로 검증: 내부 링크 hover → RSC 프리페치 1건, 외부 링크 hover → 0건, 콘솔 오류 0.
+- **라우터 캐시**: `staleTimes` dynamic 30초 → 120초, static 300초. 뒤로가기·재방문이 즉시 표시된다(관리자 편집 반영은 최대 2분 지연).
+- `/tools/*` 는 로그인한 사람만 받으므로 공용 CDN 이 아닌 브라우저에만 1시간 캐시(`private, max-age=3600`).
+
+검토했으나 하지 않은 것: 문서 목록을 `unstable_cache` 로 공유 캐시하는 안. RLS 가 `to authenticated` 라 캐시 안에서 쓸 토큰이 요청마다 다르고, 문서 상세 질의는 관리자에게 draft 까지 보이므로 캐시가 초안을 구성원에게 흘릴 수 있다. 이득(병렬 질의 1단계, 수십 ms)에 비해 위험이 커서 보류.
+
 ## 버그·속도 점검 (2026-09-30)
 
 검사 방법: `npx tsc --noEmit`(통과) · 순수 로직 단위 테스트 13개(node --experimental-strip-types, 전부 통과) · 프로덕션 빌드 서버 + Playwright 로 홈·문서·검색·로그인·404 를 데스크톱/모바일에서 렌더(콘솔 오류 0, 가로 스크롤 0, XSS 실행 0) · 인증 가드 라우트별 확인 · 배포 사이트 응답 측정. 테스트 스크립트는 도구 zip 의 `qa/`(unit.test.ts, smoke.js, prefetch.js).

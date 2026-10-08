@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/SiteHeader";
+import { HoverPrefetch } from "@/components/HoverPrefetch";
 import { SearchProvider, type SearchSuggestion } from "@/components/search/SearchCommand";
 import type { DocType } from "@/lib/constants";
 
@@ -44,6 +45,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <SearchProvider suggestions={suggestions}>
+      <HoverPrefetch />
       <div className="flex min-h-screen flex-col">
         <SiteHeader userLabel={profile?.name ?? user?.email ?? ""} isAdmin={profile?.role === "admin"} />
         <div className="flex-1">{children}</div>
